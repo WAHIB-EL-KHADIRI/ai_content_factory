@@ -1,0 +1,92 @@
+# AI Video Generation System Configuration
+
+# DeepSeek API Configuration
+deepseek:
+  api_key: "YOUR_DEEPSEEK_API_KEY"
+  base_url: "https://api.deepseek.com/v1"
+  model: "deepseek-chat"
+  max_tokens: 2000
+
+# Text-to-Speech Configuration
+# Supported providers: elevenlabs, azure, google, coqui
+tts:
+  provider: "elevenlabs"  # Change to your preferred provider
+  
+  # ElevenLabs settings
+  elevenlabs:
+    api_key: "YOUR_ELEVENLABS_API_KEY"
+    voice_id: "21m00Tcm4TlvDq8ikWAM"  # Default voice
+    model_id: "eleven_multilingual_v2"
+    stability: 0.5
+    similarity_boost: 0.75
+  
+  # Azure Cognitive Services settings
+  azure:
+    api_key: "YOUR_AZURE_SPEECH_KEY"
+    region: "eastus"
+    voice_name: "en-US-JennyNeural"
+    
+  # Google Cloud TTS settings
+  google:
+    credentials_path: "path/to/google-credentials.json"
+    language_code: "en-US"
+    voice_name: "en-US-Neural2-C"
+    
+  # Coqui TTS (local, no API key needed)
+  coqui:
+    model_name: "tts_models/en/ljspeech/tacotron2-DDC"
+
+# Image Generation Configuration
+# Supported providers: openai, stability, local
+image_generation:
+  provider: "openai"  # Change to your preferred provider
+  
+  # OpenAI DALL-E settings
+  openai:
+    api_key: "YOUR_OPENAI_API_KEY"
+    model: "dall-e-3"
+    size: "1792x1024"  # landscape format
+    quality: "hd"
+    
+  # Stability AI settings
+  stability:
+    api_key: "YOUR_STABILITY_API_KEY"
+    engine: "stable-diffusion-xl-1024-v1-0"
+    width: 1792
+    height: 1024
+    
+  # Local Stable Diffusion settings
+  local:
+    model_id: "stabilityai/stable-diffusion-xl-base-1.0"
+    device: "cuda"  # or "cpu"
+    num_inference_steps: 50
+
+# Video Settings
+video:
+  resolution: [1920, 1080]
+  fps: 30
+  codec: "libx264"
+  audio_codec: "aac"
+  bitrate: "8000k"
+  transition_duration: 1.0  # seconds
+  ken_burns_effect: true  # Apply zoom/pan to images
+  background_music: null  # Path to music file or null
+
+# Script Generation Settings
+script:
+  min_scenes: 3
+  max_scenes: 8
+  target_duration: 60  # seconds (approximate)
+  style: "educational"  # educational, documentary, entertaining
+
+# Paths
+paths:
+  cache_dir: "cache"
+  cache_audio: "cache/audio"
+  cache_images: "cache/images"
+  output_dir: "output"
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  file: "logs/video_generator.log"
