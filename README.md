@@ -4,7 +4,7 @@
 
 ### Multi-agent AI content creation platform with visual workflows, 8 specialized agents, and real-time collaboration
 
-[![CI](https://github.com/your-org/ai-content-os/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/ai-content-os/actions/workflows/ci.yml)
+[![CI](https://github.com/WAHIB-EL-KHADIRI/ai_content_factory/actions/workflows/ci.yml/badge.svg)](https://github.com/WAHIB-EL-KHADIRI/ai_content_factory/actions/workflows/ci.yml)
 [![Python 3.12](https://img.shields.io/badge/python-3.12+-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![React 18](https://img.shields.io/badge/React-18-61DAFB.svg?style=flat&logo=react&logoColor=black)](https://react.dev/)
@@ -77,7 +77,7 @@
 ### With Docker (recommended)
 
 ```bash
-git clone https://github.com/your-org/ai-content-os.git
+git clone https://github.com/WAHIB-EL-KHADIRI/ai_content_factory.git
 cd ai-content-os
 cp .env.example .env
 # Edit .env with your API keys
@@ -88,7 +88,7 @@ docker compose up -d
 ### Manual Setup
 
 ```bash
-git clone https://github.com/your-org/ai-content-os.git
+git clone https://github.com/WAHIB-EL-KHADIRI/ai_content_factory.git
 cd ai-content-os
 
 # Backend
@@ -305,7 +305,7 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 **Built with care by the AI Content OS community**
 
-[Report Bug](https://github.com/your-org/ai-content-os/issues) · [Request Feature](https://github.com/your-org/ai-content-os/issues) · [Discussions](https://github.com/your-org/ai-content-os/discussions)
+[Report Bug](https://github.com/WAHIB-EL-KHADIRI/ai_content_factory/issues) · [Request Feature](https://github.com/WAHIB-EL-KHADIRI/ai_content_factory/issues) · [Discussions](https://github.com/WAHIB-EL-KHADIRI/ai_content_factory/discussions)
 
 </div>
 ]]>
