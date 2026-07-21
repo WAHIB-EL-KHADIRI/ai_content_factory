@@ -1,24 +1,40 @@
-# Core dependencies
+# AI Content OS - Runtime Dependencies
+
+# Core Framework
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+pydantic==2.9.2
+python-multipart==0.0.9
+
+# Database
+sqlalchemy==2.0.35
+aiosqlite==0.20.0
+alembic==1.13.2
+
+# Configuration
+python-dotenv==1.0.1
+PyYAML==6.0.2
+
+# HTTP Client
+requests==2.32.3
+
+# OpenAI compatible (DeepSeek, etc.)
+openai==1.51.0
+
+# Anthropic
+anthropic==0.37.1
+
+# TTS
+elevenlabs==1.54.0
+
+# Image Generation
+Pillow==10.4.0
+
+# Video Assembly
 moviepy==1.0.3
-Pillow==10.2.0
-requests==2.31.0
-PyYAML==6.0.1
-
-# OpenAI for DeepSeek API (compatible client)
-openai==1.12.0
-
-# TTS options
-elevenlabs==0.2.27
-azure-cognitiveservices-speech==1.35.0
-google-cloud-texttospeech==2.16.3
-TTS==0.22.0  # Coqui TTS for local option
-
-# Image generation
-stability-sdk==0.8.6
-diffusers==0.26.3
-torch==2.2.0
+pydub==0.25.1
 
 # Utilities
-python-dotenv==1.0.1
-tqdm==4.66.1
-pydub==0.25.1
+tqdm==4.66.5
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4

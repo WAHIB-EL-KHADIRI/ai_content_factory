@@ -27,6 +27,14 @@ wheels/
 .env
 .venv
 
+# SQLite databases
+*.db
+*.sqlite3
+
+# Environment files
+.env.local
+.env.*.local
+
 # Cache directories
 cache/
 *.mp3
@@ -36,12 +44,20 @@ cache/
 *.wav
 
 # Output
-output/*.mp4
-output/*.mov
+output/
+*.mov
 
 # Logs
 logs/
 *.log
+
+# Docker
+.docker/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
 
 # IDE
 .vscode/
@@ -49,6 +65,9 @@ logs/
 *.swp
 *.swo
 *~
+*.code-workspace
+.cursor/
+.cursorignore
 
 # OS
 .DS_Store
@@ -63,3 +82,25 @@ models/
 temp/
 tmp/
 *.tmp
+
+# Python
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# Alembic
+alembic/versions/*.pyc
+
+# Build
+*.whl
+*.tar.gz
+
+# Runtime data
+data/
+uploads/
+
+# OpenHands workspace secrets
+workspace/.openhands/

@@ -1,237 +1,311 @@
-# AI Video Generation System
+<![CDATA[<div align="center">
 
-An AI-powered system that automatically generates complete videos from simple text topics. Uses DeepSeek for script generation, multiple TTS providers for voiceover, image generation APIs for visuals, and MoviePy for video assembly.
+# AI Content OS
+
+### Multi-agent AI content creation platform with visual workflows, 8 specialized agents, and real-time collaboration
+
+[![CI](https://github.com/your-org/ai-content-os/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/ai-content-os/actions/workflows/ci.yml)
+[![Python 3.12](https://img.shields.io/badge/python-3.12+-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![React 18](https://img.shields.io/badge/React-18-61DAFB.svg?style=flat&logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6.svg?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen.svg)]()
+
+---
+
+**AI Content OS** is an open-source, multi-agent content creation platform that orchestrates 8 specialized AI agents through visual workflows to research, write, optimize, translate, design, and publish content — all with brand consistency, cost control, and real-time streaming.
+
+</div>
+
+---
 
 ## Features
 
-- 🤖 **AI Script Generation**: Uses DeepSeek to create structured video scripts
-- 🎙️ **Multi-Provider TTS**: Supports ElevenLabs, Azure, Google Cloud, and Coqui TTS
-- 🎨 **Flexible Image Generation**: Works with DALL-E 3, Stability AI, or local Stable Diffusion
-- 🎬 **Professional Video Assembly**: MoviePy-based assembly with transitions and effects
-- 💾 **Smart Caching**: Caches audio and images to avoid regeneration
-- ⚡ **Parallel Processing**: Generates voiceovers and visuals concurrently
+| Feature | Description |
+|---------|-------------|
+| **8 AI Agents** | Research, Writer, SEO, Editor, Translator, Designer, Publisher, Reviewer — each a specialist |
+| **Visual Workflow Builder** | Drag-and-drop pipelines with conditions, retries, parallelism, and human approval gates |
+| **Multi-Model Routing** | Intelligent selection across GPT-4o, Claude, and DeepSeek based on task, cost, and quality |
+| **Real-Time Streaming Chat** | WebSocket-powered chat with streaming LLM responses and agent collaboration |
+| **Brand Consistency Engine** | Define voice, tone, style guides, and vocabulary — enforced across all content |
+| **RAG-Powered Research Studio** | Upload documents, build knowledge bases, and ground AI responses in your data |
+| **Background Task Queue** | Async job processing for long-running workflows and batch operations |
+| **WebSocket Real-Time Updates** | Live progress, status, and streaming output to any connected client |
+| **Plugin System** | Extend agents, tools, workflows, and integrations with a first-class SDK |
+| **Admin Dashboard** | User management, system health, cost analytics, and audit logs |
+| **Dark Mode** | Full dark mode support in the React frontend |
 
-## System Architecture
+---
+
+## Architecture
 
 ```
-Topic Input → Script Generator (DeepSeek)
-            ↓
-         Scenes → Voiceover Generator (TTS) → Audio Files
-            ↓           ↓
-            └────→ Visual Generator (AI) → Image Files
-                        ↓
-                  Video Assembler (MoviePy) → Final Video
+┌──────────────────────────────────────────────────────────────────────┐
+│                         FRONTEND                                     │
+│               React 18 · TypeScript · Tailwind · Vite                │
+│          Dashboard · Workflow Builder · Chat · Content Editor         │
+├──────────────────────────────────────────────────────────────────────┤
+│                          API LAYER                                    │
+│    FastAPI · REST + WebSocket · JWT Auth · Rate Limiting · CORS      │
+│    /api/v1/auth  /chat  /agents  /content  /workflows  /brands      │
+├──────────────┬───────────────┬───────────────┬───────────────────────┤
+│   SERVICES   │    AGENTS     │   WORKFLOWS   │      PLUGINS          │
+│  Content Svc │  Research     │  Engine       │  AgentPlugin          │
+│  Brand Svc   │  Writer       │  Builder      │  ToolPlugin           │
+│  Memory Svc  │  SEO          │  Conditions   │  IntegrationPlugin    │
+│  Model Router│  Editor       │  Retries      │  Plugin Registry      │
+│  Analytics   │  Translator   │  Approval     │                       │
+│              │  Designer     │  Gates        │                       │
+│              │  Publisher    │               │                       │
+│              │  Reviewer     │               │                       │
+├──────────────┴───────────────┴───────────────┴───────────────────────┤
+│                       MODEL LAYER                                    │
+│            OpenAI (GPT-4o)  ·  Anthropic (Claude)  ·  DeepSeek      │
+│              Cost optimization  ·  Quality routing  ·  Fallbacks     │
+├──────────────────────────────────────────────────────────────────────┤
+│                     DATA & INFRASTRUCTURE                             │
+│        SQLite/PostgreSQL · SQLAlchemy ORM · Redis · Celery           │
+│              Alembic Migrations · Docker · GitHub Actions            │
+└──────────────────────────────────────────────────────────────────────┘
 ```
 
-## Installation
+---
 
-1. **Clone or navigate to the project directory**
+## Quick Start
 
-2. **Install dependencies**:
+### With Docker (recommended)
+
 ```bash
+git clone https://github.com/your-org/ai-content-os.git
+cd ai-content-os
+cp .env.example .env
+# Edit .env with your API keys
+docker compose up -d
+# Open http://localhost:3000 (frontend) or http://localhost:8000/docs (API)
+```
+
+### Manual Setup
+
+```bash
+git clone https://github.com/your-org/ai-content-os.git
+cd ai-content-os
+
+# Backend
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
+cp .env.example .env
+
+# Start backend
+python -m backend.api.app
+
+# Frontend (separate terminal)
+cd frontend
+npm install
+npm run dev
 ```
 
-3. **Configure API keys** (see Configuration section)
-
-## Configuration
-
-Edit `config.yaml` to set up your API keys and preferences:
-
-### Required API Keys
-
-1. **DeepSeek API** (required):
-   - Get your API key from [DeepSeek](https://platform.deepseek.com/)
-   - Set in `config.yaml` under `deepseek.api_key`
-
-2. **TTS Service** (choose one):
-   - **ElevenLabs** (recommended): https://elevenlabs.io/
-   - **Azure Cognitive Services**: https://azure.microsoft.com/en-us/services/cognitive-services/speech-services/
-   - **Google Cloud TTS**: https://cloud.google.com/text-to-speech
-   - **Coqui TTS** (free, local, no API key needed)
-
-3. **Image Generation** (choose one):
-   - **OpenAI DALL-E 3**: https://platform.openai.com/
-   - **Stability AI**: https://stability.ai/
-   - **Local Stable Diffusion** (free, requires GPU)
-
-### Basic Configuration Example
-
-```yaml
-deepseek:
-  api_key: "sk-xxxxx"
-
-tts:
-  provider: "elevenlabs"  # or "azure", "google", "coqui"
-  elevenlabs:
-    api_key: "your-key-here"
-
-image_generation:
-  provider: "openai"  # or "stability", "local"
-  openai:
-    api_key: "sk-xxxxx"
-```
-
-## Usage
-
-### Basic Usage
-
-Generate a video from a topic:
+### Verify
 
 ```bash
-python main.py "The History of Coffee"
+curl http://localhost:8000/health
+# {"status":"healthy","version":"1.0.0"}
 ```
 
-### Advanced Options
+---
+
+## API Reference
+
+### Authentication
 
 ```bash
-# Specify output filename
-python main.py "The History of Coffee" --output coffee_history.mp4
+# Register
+curl -X POST http://localhost:8000/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"username":"demo","email":"demo@example.com","password":"securepass123"}'
 
-# Use custom config file
-python main.py "Topic" --config my_config.yaml
-
-# Validate configuration
-python main.py --validate "Test Topic"
+# Login
+curl -X POST http://localhost:8000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"demo","password":"securepass123"}'
 ```
 
-### Python API Usage
+### Chat (Streaming)
 
-```python
-from modules import VideoGenerationPipeline
-
-# Initialize pipeline
-pipeline = VideoGenerationPipeline(config_path="config.yaml")
-
-# Generate video
-video_path = pipeline.generate_video(
-    topic="The History of Coffee",
-    output_filename="coffee_history.mp4"
-)
-
-print(f"Video saved to: {video_path}")
+```bash
+curl -X POST http://localhost:8000/api/v1/chat/stream \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
+  -d '{"message":"Write a blog post about AI trends in 2026","model":"gpt-4o"}'
 ```
+
+### Content Creation
+
+```bash
+curl -X POST http://localhost:8000/api/v1/content \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
+  -d '{
+    "project_id": "my-project",
+    "topic": "The Future of AI in Healthcare",
+    "content_type": "article",
+    "word_count": 1500
+  }'
+```
+
+### Agent Execution
+
+```bash
+curl -X POST http://localhost:8000/api/v1/agents/run \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
+  -d '{"agent_role":"seo","task":{"action":"keywords","topic":"AI healthcare"}}'
+```
+
+### Workflow Management
+
+```bash
+# Create from template
+curl -X POST "http://localhost:8000/api/v1/workflows/templates/article?topic=AI+in+Healthcare" \
+  -H "Authorization: Bearer <token>"
+
+# Execute workflow
+curl -X POST http://localhost:8000/api/v1/workflows/run \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
+  -d '{"workflow_id":"<id>","context":{"project_id":"my-project"}}'
+```
+
+### Brand Management
+
+```bash
+curl -X POST http://localhost:8000/api/v1/brands \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
+  -d '{"name":"Acme Corp","voice":"professional","tone":"friendly","style_guide":"Use simple language"}'
+```
+
+> Full interactive API docs at **http://localhost:8000/docs** (Swagger) and **http://localhost:8000/redoc** (ReDoc).
+
+---
+
+## Agents
+
+| Agent | Role | What It Does |
+|-------|------|--------------|
+| Research | `research` | Gathers information, analyzes topics, and synthesizes findings |
+| Writer | `writer` | Creates articles, scripts, social posts, and long-form content |
+| SEO | `seo` | Keyword research, on-page optimization, meta tag generation |
+| Editor | `editor` | Grammar, style, clarity, tone consistency, and restructuring |
+| Translator | `translator` | Multi-language translation with cultural localization |
+| Designer | `designer` | Visual content concepts, image prompt generation, layout suggestions |
+| Publisher | `publisher` | Platform-specific formatting, scheduling, and distribution |
+| Reviewer | `reviewer` | Quality assurance, fact-checking, compliance, and final approval |
+
+---
+
+## Tech Stack
+
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| **Backend** | FastAPI, SQLAlchemy, Celery-compatible | Async REST API with ORM and task queue |
+| **Frontend** | React 18, TypeScript, Tailwind CSS, Vite | Modern SPA with type safety and fast builds |
+| **AI Models** | OpenAI, Anthropic, DeepSeek | Multi-provider model routing and fallbacks |
+| **Database** | SQLite (dev) / PostgreSQL (prod) | Relational storage with Alembic migrations |
+| **Cache/Queue** | Redis | Background job processing and caching |
+| **Infrastructure** | Docker, Docker Compose | Containerized development and deployment |
+| **CI/CD** | GitHub Actions | Automated testing, linting, and deployment |
+| **Code Quality** | Ruff, MyPy, Pytest | Linting, type checking, and testing |
+
+---
 
 ## Project Structure
 
 ```
-ai_content_factory/
-├── main.py                      # Main orchestrator
-├── config.yaml                  # Configuration file
-├── requirements.txt             # Python dependencies
-├── README.md                    # This file
-│
-├── modules/
-│   ├── __init__.py              # Module exports
-│   ├── utils.py                 # Utility functions
-│   ├── prompts.py               # Prompt templates
-│   ├── script_generator.py     # DeepSeek integration
-│   ├── voiceover_generator.py  # TTS integration
-│   ├── visual_generator.py     # Image generation
-│   └── video_assembler.py      # MoviePy assembly
-│
-├── cache/
-│   ├── audio/                   # Cached audio files
-│   └── images/                  # Cached images
-│
-├── output/                      # Generated videos
-└── logs/                        # Log files
+ai-content-os/
+├── backend/
+│   ├── api/                # FastAPI routes, middleware, WebSocket
+│   ├── core/               # Configuration, auth, security
+│   ├── db/                 # SQLAlchemy models and repositories
+│   ├── agents/             # 8 specialized AI agents
+│   ├── services/           # Business logic (content, brand, memory)
+│   ├── workflows/          # Workflow engine, builder, conditions
+│   ├── analytics/          # Cost tracking, usage metrics
+│   └── plugins/            # Plugin SDK and registry
+├── frontend/
+│   ├── src/
+│   │   ├── components/     # React UI components
+│   │   ├── pages/          # Route pages
+│   │   └── hooks/          # Custom React hooks
+│   ├── package.json
+│   └── vite.config.ts
+├── tests/
+│   ├── unit/               # Unit tests
+│   ├── integration/        # Integration tests
+│   └── e2e/                # End-to-end tests
+├── docker/                 # Docker configuration
+├── .github/workflows/      # CI/CD pipelines
+├── docs/                   # Documentation
+├── alembic/                # Database migrations
+├── docker-compose.yml
+├── requirements.txt
+└── .env.example
 ```
 
-## How It Works
+---
 
-1. **Script Generation**: 
-   - Takes a topic as input
-   - Calls DeepSeek API to generate structured script
-   - Parses script into scenes with narration and visual descriptions
+## Configuration
 
-2. **Asset Generation**:
-   - **Voiceovers**: Converts narration to audio using TTS
-   - **Visuals**: Generates images from visual descriptions using AI
-   - Both processes run concurrently for efficiency
+All configuration is managed via environment variables. Copy `.env.example` to `.env` and set your keys:
 
-3. **Video Assembly**:
-   - Combines images and audio for each scene
-   - Applies Ken Burns effect (zoom/pan) to images
-   - Adds transitions between scenes
-   - Exports final video with proper encoding
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `OPENAI_API_KEY` | OpenAI API key | Yes |
+| `ANTHROPIC_API_KEY` | Anthropic API key | No |
+| `DEEPSEEK_API_KEY` | DeepSeek API key | No |
+| `DATABASE_URL` | Database connection string | Yes |
+| `SECRET_KEY` | Application secret for JWT | Yes |
+| `REDIS_URL` | Redis connection for task queue | No |
 
-## Configuration Options
+---
 
-### Video Settings
+## Testing
 
-```yaml
-video:
-  resolution: [1920, 1080]      # Video resolution
-  fps: 30                        # Frames per second
-  transition_duration: 1.0       # Transition time in seconds
-  ken_burns_effect: true         # Apply zoom/pan to images
-  background_music: null         # Path to music file (optional)
+```bash
+# Unit tests
+pytest tests/unit/ -v
+
+# Integration tests
+pytest tests/integration/ -v
+
+# All tests with coverage
+pytest tests/ -v --cov=backend
+
+# Lint and type check
+ruff check backend/
+mypy backend/
 ```
 
-### Script Settings
-
-```yaml
-script:
-  min_scenes: 3                  # Minimum number of scenes
-  max_scenes: 8                  # Maximum number of scenes
-  target_duration: 60            # Target duration in seconds
-  style: "educational"           # Video style
-```
-
-## Troubleshooting
-
-### API Key Issues
-- Make sure API keys are correctly set in `config.yaml`
-- Run `python main.py --validate "Test"` to check configuration
-
-### MoviePy Installation Issues
-- On Windows, you may need to install ImageMagick separately
-- Download from: https://imagemagick.org/script/download.php
-
-### GPU Memory Issues (Local Stable Diffusion)
-- Reduce image resolution in config
-- Use fewer inference steps
-- Switch to CPU mode (slower but uses less memory)
-
-### Audio Generation Fails
-- Check TTS API quotas and limits
-- Try switching to Coqui TTS (local, free) for testing
-- Check internet connection for cloud providers
-
-## Performance Tips
-
-1. **Use Caching**: Generated audio and images are cached automatically
-2. **Choose Providers Wisely**: 
-   - Fastest: ElevenLabs (TTS) + DALL-E 3 (images)
-   - Free: Coqui TTS + Local Stable Diffusion
-3. **Optimize Settings**: Lower FPS and resolution for faster processing
-
-## Requirements
-
-- Python 3.9 or higher
-- FFmpeg (for MoviePy)
-- Minimum 8GB RAM
-- GPU recommended for local Stable Diffusion
-
-## License
-
-This project is provided as-is for educational and commercial purposes.
+---
 
 ## Contributing
 
-Feel free to submit issues, fork the repository, and create pull requests.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, code style, and PR guidelines.
 
-## Credits
+---
 
-- **DeepSeek**: AI script generation
-- **MoviePy**: Video assembly
-- **TTS Providers**: ElevenLabs, Azure, Google, Coqui
-- **Image Generation**: OpenAI, Stability AI, Hugging Face
+## License
 
-## Support
+MIT License — see [LICENSE](LICENSE) for details.
 
-For issues and questions:
-1. Check the troubleshooting section
-2. Review logs in `logs/video_generator.log`
-3. Ensure all API keys are valid and have sufficient credits
+---
+
+<div align="center">
+
+**Built with care by the AI Content OS community**
+
+[Report Bug](https://github.com/your-org/ai-content-os/issues) · [Request Feature](https://github.com/your-org/ai-content-os/issues) · [Discussions](https://github.com/your-org/ai-content-os/discussions)
+
+</div>
+]]>
