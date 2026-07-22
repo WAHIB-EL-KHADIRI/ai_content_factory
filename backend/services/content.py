@@ -18,12 +18,16 @@ class ContentService:
         self.brand_service = BrandService(db=db)
         self.memory_service = MemoryService(db=db)
 
-    async def create_content(self, project_id: str, topic: str,
-                             content_type: str = "article",
-                             brand_id: Optional[str] = None,
-                             language: str = "en",
-                             word_count: int = 1500,
-                             extra_instructions: str = "") -> Dict[str, Any]:
+    async def create_content(
+        self,
+        project_id: str,
+        topic: str,
+        content_type: str = "article",
+        brand_id: Optional[str] = None,
+        language: str = "en",
+        word_count: int = 1500,
+        extra_instructions: str = "",
+    ) -> Dict[str, Any]:
         brand_context = None
         if brand_id:
             brand_context = self.brand_service.get_brand_context(brand_id)
@@ -59,6 +63,7 @@ class ContentService:
 
         if self.db:
             from backend.db.models import Content
+
             db_content = Content(**content_record)
             self.db.add(db_content)
             self.db.commit()
@@ -81,8 +86,9 @@ class ContentService:
             "pipeline_result": result,
         }
 
-    async def edit_content(self, content_id: str, instructions: str,
-                           edit_type: str = "comprehensive") -> Dict[str, Any]:
+    async def edit_content(
+        self, content_id: str, instructions: str, edit_type: str = "comprehensive"
+    ) -> Dict[str, Any]:
         content = self._get_content(content_id)
         if not content:
             raise ValueError(f"Content not found: {content_id}")
@@ -108,8 +114,9 @@ class ContentService:
             "content_id": content_id,
         }
 
-    async def review_content(self, content_id: str,
-                             review_type: str = "comprehensive") -> Dict[str, Any]:
+    async def review_content(
+        self, content_id: str, review_type: str = "comprehensive"
+    ) -> Dict[str, Any]:
         content = self._get_content(content_id)
         if not content:
             raise ValueError(f"Content not found: {content_id}")
@@ -128,8 +135,9 @@ class ContentService:
             "content_id": content_id,
         }
 
-    async def optimize_seo(self, content_id: str,
-                           keywords: Optional[List[str]] = None) -> Dict[str, Any]:
+    async def optimize_seo(
+        self, content_id: str, keywords: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
         content = self._get_content(content_id)
         if not content:
             raise ValueError(f"Content not found: {content_id}")
@@ -154,8 +162,9 @@ class ContentService:
             "content_id": content_id,
         }
 
-    async def translate_content(self, content_id: str,
-                                target_language: str) -> Dict[str, Any]:
+    async def translate_content(
+        self, content_id: str, target_language: str
+    ) -> Dict[str, Any]:
         content = self._get_content(content_id)
         if not content:
             raise ValueError(f"Content not found: {content_id}")
@@ -195,8 +204,9 @@ class ContentService:
             "content_id": content_id,
         }
 
-    async def publish_content(self, content_id: str,
-                              platforms: List[str]) -> Dict[str, Any]:
+    async def publish_content(
+        self, content_id: str, platforms: List[str]
+    ) -> Dict[str, Any]:
         content = self._get_content(content_id)
         if not content:
             raise ValueError(f"Content not found: {content_id}")
@@ -211,10 +221,13 @@ class ContentService:
         )
 
         if result.success:
-            self._update_content(content_id, {
-                "status": "published",
-                "published_at": datetime.now(timezone.utc).isoformat(),
-            })
+            self._update_content(
+                content_id,
+                {
+                    "status": "published",
+                    "published_at": datetime.now(timezone.utc).isoformat(),
+                },
+            )
 
         return {
             "success": result.success,
@@ -225,11 +238,14 @@ class ContentService:
     def _get_content(self, content_id: str) -> Optional[Dict[str, Any]]:
         if self.db:
             from backend.db.models import Content
+
             content = self.db.query(Content).filter(Content.id == content_id).first()
             if content:
                 brand_context = None
                 if content.brand_id:
-                    brand_context = self.brand_service.get_brand_context(content.brand_id)
+                    brand_context = self.brand_service.get_brand_context(
+                        content.brand_id
+                    )
                 return {
                     "id": content.id,
                     "title": content.title,
@@ -245,6 +261,7 @@ class ContentService:
     def _update_content(self, content_id: str, data: Dict[str, Any]) -> bool:
         if self.db:
             from backend.db.models import Content
+
             content = self.db.query(Content).filter(Content.id == content_id).first()
             if content:
                 for key, value in data.items():
@@ -257,9 +274,13 @@ class ContentService:
     def _create_revision(self, content_id: str, body: str, change_summary: str):
         if self.db:
             from backend.db.models import ContentRevision
-            latest = self.db.query(ContentRevision).filter(
-                ContentRevision.content_id == content_id
-            ).order_by(ContentRevision.version.desc()).first()
+
+            latest = (
+                self.db.query(ContentRevision)
+                .filter(ContentRevision.content_id == content_id)
+                .order_by(ContentRevision.version.desc())
+                .first()
+            )
 
             version = (latest.version + 1) if latest else 1
 
@@ -273,10 +294,15 @@ class ContentService:
             self.db.add(revision)
             self.db.commit()
 
-    def list_content(self, project_id: str, content_type: Optional[str] = None,
-                     status: Optional[str] = None) -> List[Dict[str, Any]]:
+    def list_content(
+        self,
+        project_id: str,
+        content_type: Optional[str] = None,
+        status: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
         if self.db:
             from backend.db.models import Content
+
             query = self.db.query(Content).filter(Content.project_id == project_id)
             if content_type:
                 query = query.filter(Content.content_type == content_type)

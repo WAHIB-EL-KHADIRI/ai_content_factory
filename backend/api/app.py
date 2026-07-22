@@ -48,10 +48,16 @@ def create_app() -> FastAPI:
         docs_url="/docs",
         redoc_url="/redoc",
         openapi_tags=[
-            {"name": "auth", "description": "User registration, login, and API key management"},
+            {
+                "name": "auth",
+                "description": "User registration, login, and API key management",
+            },
             {"name": "chat", "description": "AI chat with streaming support"},
             {"name": "models", "description": "AI model routing and cost estimation"},
-            {"name": "agents", "description": "Multi-agent system with 8 specialized agents"},
+            {
+                "name": "agents",
+                "description": "Multi-agent system with 8 specialized agents",
+            },
             {"name": "content", "description": "Content lifecycle management"},
             {"name": "projects", "description": "Project organization and management"},
             {"name": "brands", "description": "Brand identity and consistency"},
@@ -79,15 +85,19 @@ def create_app() -> FastAPI:
     app.add_middleware(ErrorHandlingMiddleware)
 
     from backend.api.routes import router
+
     app.include_router(router, prefix="/api/v1")
 
     from backend.api.admin import router as admin_router
+
     app.include_router(admin_router, prefix="/api/v1")
 
     from backend.api.webhooks import router as webhook_router
+
     app.include_router(webhook_router, prefix="/api/v1")
 
     from backend.api.websocket import websocket_router
+
     app.include_router(websocket_router)
 
     @app.get("/health")

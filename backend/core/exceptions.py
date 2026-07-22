@@ -35,17 +35,27 @@ class NotFoundError(AppError):
 
 
 class ValidationError(AppError):
-    def __init__(self, detail: str = "Validation failed", code: str = "VALIDATION_ERROR"):
+    def __init__(
+        self, detail: str = "Validation failed", code: str = "VALIDATION_ERROR"
+    ):
         super().__init__(status_code=422, detail=detail, code=code)
 
 
 class AuthenticationError(AppError):
-    def __init__(self, detail: str = "Authentication required", code: str = "AUTHENTICATION_ERROR"):
+    def __init__(
+        self,
+        detail: str = "Authentication required",
+        code: str = "AUTHENTICATION_ERROR",
+    ):
         super().__init__(status_code=401, detail=detail, code=code)
 
 
 class AuthorizationError(AppError):
-    def __init__(self, detail: str = "Insufficient permissions", code: str = "AUTHORIZATION_ERROR"):
+    def __init__(
+        self,
+        detail: str = "Insufficient permissions",
+        code: str = "AUTHORIZATION_ERROR",
+    ):
         super().__init__(status_code=403, detail=detail, code=code)
 
 
@@ -67,5 +77,7 @@ class RateLimitError(AppError):
 
 
 class ServiceError(AppError):
-    def __init__(self, detail: str = "Service unavailable", code: str = "SERVICE_ERROR"):
+    def __init__(
+        self, detail: str = "Service unavailable", code: str = "SERVICE_ERROR"
+    ):
         super().__init__(status_code=503, detail=detail, code=code)

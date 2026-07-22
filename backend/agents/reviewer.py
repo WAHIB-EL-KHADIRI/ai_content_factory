@@ -32,8 +32,9 @@ Provide a thorough, objective review with actionable feedback.
 Rate content on multiple dimensions.
 Respond in valid JSON format."""
 
-    async def execute(self, task: Dict[str, Any],
-                      context: Optional[Dict[str, Any]] = None) -> AgentResult:
+    async def execute(
+        self, task: Dict[str, Any], context: Optional[Dict[str, Any]] = None
+    ) -> AgentResult:
         start = time.time()
 
         content = task.get("content", "")
@@ -66,8 +67,13 @@ Respond in valid JSON format."""
                 success=False, error=str(e), duration=time.time() - start
             )
 
-    def _build_review_prompt(self, content: str, review_type: str,
-                             criteria: list, context: Optional[Dict[str, Any]]) -> str:
+    def _build_review_prompt(
+        self,
+        content: str,
+        review_type: str,
+        criteria: list,
+        context: Optional[Dict[str, Any]],
+    ) -> str:
         criteria_text = ""
         if criteria:
             criteria_text = f"Specific Criteria: {', '.join(criteria)}"

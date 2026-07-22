@@ -44,10 +44,12 @@ class RAGStudio:
             return result
         return None
 
-    async def research(self, query: str, num_results: int = 5,
-                       model: Optional[str] = None) -> ResearchResult:
+    async def research(
+        self, query: str, num_results: int = 5, model: Optional[str] = None
+    ) -> ResearchResult:
         """Research a topic and return sources with a summary"""
         import time
+
         start = time.time()
 
         cache_key = self._cache_key(query, num_results)
@@ -78,7 +80,10 @@ class RAGStudio:
         try:
             router = ModelRouter()
             messages = [
-                {"role": "system", "content": "You are a research assistant. For the given query, provide a list of relevant source titles, URLs, and brief snippets. Return as JSON array with objects containing: title, url, snippet. Provide at least 3 sources."},
+                {
+                    "role": "system",
+                    "content": "You are a research assistant. For the given query, provide a list of relevant source titles, URLs, and brief snippets. Return as JSON array with objects containing: title, url, snippet. Provide at least 3 sources.",
+                },
                 {"role": "user", "content": f"Find sources for: {query}"},
             ]
 
@@ -90,6 +95,7 @@ class RAGStudio:
             )
 
             import json
+
             content = result.get("content", "[]")
             try:
                 raw_sources = json.loads(content)
@@ -98,14 +104,16 @@ class RAGStudio:
 
             sources = []
             for i, s in enumerate(raw_sources[:num_results]):
-                sources.append(Source(
-                    id=f"src_{i}",
-                    title=s.get("title", "Untitled"),
-                    url=s.get("url", ""),
-                    snippet=s.get("snippet", ""),
-                    relevance=max(0.5, 1.0 - (i * 0.1)),
-                    provider="ai_enhanced",
-                ))
+                sources.append(
+                    Source(
+                        id=f"src_{i}",
+                        title=s.get("title", "Untitled"),
+                        url=s.get("url", ""),
+                        snippet=s.get("snippet", ""),
+                        relevance=max(0.5, 1.0 - (i * 0.1)),
+                        provider="ai_enhanced",
+                    )
+                )
 
             return sources
 
@@ -122,20 +130,28 @@ class RAGStudio:
                 )
             ]
 
-    async def _generate_summary(self, query: str, sources: List[Source],
-                                model: Optional[str] = None) -> str:
+    async def _generate_summary(
+        self, query: str, sources: List[Source], model: Optional[str] = None
+    ) -> str:
         """Generate a summary from the found sources"""
         from backend.services.model_router import ModelRouter, TaskType
 
         try:
             router = ModelRouter()
-            source_text = "\n".join([
-                f"- {s.title}: {s.snippet}" for s in sources if s.snippet
-            ]) or "No sources found."
+            source_text = (
+                "\n".join([f"- {s.title}: {s.snippet}" for s in sources if s.snippet])
+                or "No sources found."
+            )
 
             messages = [
-                {"role": "system", "content": "You are a research assistant. Summarize the findings for the given topic based on the provided sources. Be concise but comprehensive. Use markdown formatting."},
-                {"role": "user", "content": f"Topic: {query}\n\nSources:\n{source_text}\n\nProvide a comprehensive summary:"},
+                {
+                    "role": "system",
+                    "content": "You are a research assistant. Summarize the findings for the given topic based on the provided sources. Be concise but comprehensive. Use markdown formatting.",
+                },
+                {
+                    "role": "user",
+                    "content": f"Topic: {query}\n\nSources:\n{source_text}\n\nProvide a comprehensive summary:",
+                },
             ]
 
             result = router.chat(
@@ -168,9 +184,9 @@ class RAGStudio:
 
         unique_sources = list({s.id: s for s in all_sources}.values())
 
-        combined_summary = "\n\n".join([
-            f"## Pass {i+1}\n{s}" for i, s in enumerate(all_summaries)
-        ])
+        combined_summary = "\n\n".join(
+            [f"## Pass {i+1}\n{s}" for i, s in enumerate(all_summaries)]
+        )
 
         return {
             "query": query,

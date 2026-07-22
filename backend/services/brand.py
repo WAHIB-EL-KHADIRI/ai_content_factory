@@ -27,6 +27,7 @@ class BrandService:
 
         if self.db:
             from backend.db.models import Brand
+
             db_brand = Brand(**brand)
             self.db.add(db_brand)
             self.db.commit()
@@ -45,6 +46,7 @@ class BrandService:
     def get_brand(self, brand_id: str) -> Optional[Dict[str, Any]]:
         if self.db:
             from backend.db.models import Brand
+
             brand = self.db.query(Brand).filter(Brand.id == brand_id).first()
             if brand:
                 return {
@@ -61,9 +63,12 @@ class BrandService:
                 }
         return None
 
-    def update_brand(self, brand_id: str, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def update_brand(
+        self, brand_id: str, data: Dict[str, Any]
+    ) -> Optional[Dict[str, Any]]:
         if self.db:
             from backend.db.models import Brand
+
             brand = self.db.query(Brand).filter(Brand.id == brand_id).first()
             if brand:
                 for key, value in data.items():
@@ -77,6 +82,7 @@ class BrandService:
     def delete_brand(self, brand_id: str) -> bool:
         if self.db:
             from backend.db.models import Brand
+
             brand = self.db.query(Brand).filter(Brand.id == brand_id).first()
             if brand:
                 self.db.delete(brand)
@@ -87,6 +93,7 @@ class BrandService:
     def get_project_brands(self, project_id: str) -> List[Dict[str, Any]]:
         if self.db:
             from backend.db.models import Brand
+
             brands = self.db.query(Brand).filter(Brand.project_id == project_id).all()
             return [
                 {
@@ -128,20 +135,24 @@ class BrandService:
             found = sum(1 for kw in keywords if kw.lower() in content.lower())
             coverage = found / len(keywords) * 100 if keywords else 100
             if coverage < 30:
-                issues.append({
-                    "type": "keywords",
-                    "message": f"Low keyword coverage: {coverage:.0f}%",
-                    "severity": "medium",
-                })
+                issues.append(
+                    {
+                        "type": "keywords",
+                        "message": f"Low keyword coverage: {coverage:.0f}%",
+                        "severity": "medium",
+                    }
+                )
                 score -= 10
 
         word_count = len(content.split())
         if word_count < 100:
-            issues.append({
-                "type": "length",
-                "message": "Content is too short",
-                "severity": "low",
-            })
+            issues.append(
+                {
+                    "type": "length",
+                    "message": "Content is too short",
+                    "severity": "low",
+                }
+            )
             score -= 5
 
         return {

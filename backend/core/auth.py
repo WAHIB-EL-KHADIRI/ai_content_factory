@@ -33,7 +33,9 @@ def verify_password(password: str, hashed: str) -> bool:
         return False
 
 
-def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
+def create_access_token(
+    data: Dict[str, Any], expires_delta: Optional[timedelta] = None
+) -> str:
     from jose import jwt
 
     config = get_config()
@@ -47,7 +49,9 @@ def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta]
         )
 
     to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, config.security.secret_key, algorithm=config.security.algorithm)
+    return jwt.encode(
+        to_encode, config.security.secret_key, algorithm=config.security.algorithm
+    )
 
 
 def decode_access_token(token: str) -> Optional[Dict[str, Any]]:
@@ -79,6 +83,7 @@ def hash_api_key(raw_key: str) -> str:
 
 def authenticate_user(db, email: str, password: str):
     from backend.db.models import User
+
     user = db.query(User).filter(User.email == email).first()
     if user and verify_password(password, user.hashed_password):
         return user
@@ -87,6 +92,7 @@ def authenticate_user(db, email: str, password: str):
 
 def create_user(db, email: str, name: str, password: str):
     from backend.db.models import User
+
     existing = db.query(User).filter(User.email == email).first()
     if existing:
         return None

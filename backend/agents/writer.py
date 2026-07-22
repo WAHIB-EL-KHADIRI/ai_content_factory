@@ -38,8 +38,9 @@ Content types you handle:
 
 Always provide well-formatted content with proper structure. Respond in valid JSON."""
 
-    async def execute(self, task: Dict[str, Any],
-                      context: Optional[Dict[str, Any]] = None) -> AgentResult:
+    async def execute(
+        self, task: Dict[str, Any], context: Optional[Dict[str, Any]] = None
+    ) -> AgentResult:
         start = time.time()
 
         content_type = task.get("content_type", "article")
@@ -79,10 +80,16 @@ Always provide well-formatted content with proper structure. Respond in valid JS
                 duration=time.time() - start,
             )
 
-    def _build_writing_prompt(self, content_type: str, topic: str,
-                              instructions: str, word_count: int,
-                              tone: str, format_type: str,
-                              context: Optional[Dict[str, Any]]) -> str:
+    def _build_writing_prompt(
+        self,
+        content_type: str,
+        topic: str,
+        instructions: str,
+        word_count: int,
+        tone: str,
+        format_type: str,
+        context: Optional[Dict[str, Any]],
+    ) -> str:
         research_data = ""
         brand_guidelines = ""
 

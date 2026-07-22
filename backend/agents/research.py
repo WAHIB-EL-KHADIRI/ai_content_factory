@@ -34,8 +34,9 @@ Always provide:
 
 Respond in valid JSON format."""
 
-    async def execute(self, task: Dict[str, Any],
-                      context: Optional[Dict[str, Any]] = None) -> AgentResult:
+    async def execute(
+        self, task: Dict[str, Any], context: Optional[Dict[str, Any]] = None
+    ) -> AgentResult:
         start = time.time()
 
         topic = task.get("topic", "")
@@ -70,12 +71,17 @@ Respond in valid JSON format."""
                 duration=time.time() - start,
             )
 
-    def _build_research_prompt(self, topic: str, research_type: str,
-                               depth: str, context: Optional[Dict[str, Any]]) -> str:
+    def _build_research_prompt(
+        self,
+        topic: str,
+        research_type: str,
+        depth: str,
+        context: Optional[Dict[str, Any]],
+    ) -> str:
         depth_instruction = {
             "quick": "Provide a brief overview with 3-5 key points.",
             "standard": "Provide comprehensive research with detailed analysis.",
-            "deep": "Provide exhaustive research with deep analysis, multiple angles, and detailed insights."
+            "deep": "Provide exhaustive research with deep analysis, multiple angles, and detailed insights.",
         }.get(depth, "Provide comprehensive research with detailed analysis.")
 
         type_instruction = {
@@ -112,7 +118,9 @@ Provide your research as a JSON object with these fields:
         if context:
             existing_content = context.get("existing_content", "")
             if existing_content:
-                prompt += f"\n\nExisting content to build upon:\n{existing_content[:1000]}"
+                prompt += (
+                    f"\n\nExisting content to build upon:\n{existing_content[:1000]}"
+                )
 
         return prompt
 

@@ -15,10 +15,12 @@ class VideoService:
 
     def _get_pipeline(self):
         from src.main import VideoGenerationPipeline
+
         return VideoGenerationPipeline(config_path=self.config_path)
 
-    async def generate_video(self, topic: str, output_filename: Optional[str] = None,
-                             mock: bool = False) -> Dict[str, Any]:
+    async def generate_video(
+        self, topic: str, output_filename: Optional[str] = None, mock: bool = False
+    ) -> Dict[str, Any]:
         """Generate a video from a topic (runs pipeline in thread to avoid blocking)"""
         loop = asyncio.get_event_loop()
         try:
@@ -29,7 +31,7 @@ class VideoService:
                     topic=topic,
                     output_filename=output_filename,
                     mock=mock,
-                )
+                ),
             )
             return {
                 "status": "completed",
@@ -45,7 +47,9 @@ class VideoService:
                 "topic": topic,
             }
 
-    async def generate_script_only(self, topic: str, mock: bool = True) -> Dict[str, Any]:
+    async def generate_script_only(
+        self, topic: str, mock: bool = True
+    ) -> Dict[str, Any]:
         """Generate only the script (no voiceover/visuals/assembly)"""
         try:
             from src.generators import ScriptGenerator
@@ -87,7 +91,12 @@ class VideoService:
         return {
             "name": "Video Generation Pipeline",
             "version": "1.0.0",
-            "steps": ["Script Generation", "Voiceover Generation", "Visual Generation", "Video Assembly"],
+            "steps": [
+                "Script Generation",
+                "Voiceover Generation",
+                "Visual Generation",
+                "Video Assembly",
+            ],
             "providers": {
                 "script": "DeepSeek",
                 "voiceover": "ElevenLabs / Coqui TTS",

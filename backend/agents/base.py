@@ -57,8 +57,9 @@ class BaseAgent(ABC):
         self._tools: List[Dict[str, Any]] = []
 
     @abstractmethod
-    async def execute(self, task: Dict[str, Any],
-                      context: Optional[Dict[str, Any]] = None) -> AgentResult:
+    async def execute(
+        self, task: Dict[str, Any], context: Optional[Dict[str, Any]] = None
+    ) -> AgentResult:
         pass
 
     @abstractmethod
@@ -66,17 +67,20 @@ class BaseAgent(ABC):
         pass
 
     def register_tool(self, name: str, description: str, parameters: Dict[str, Any]):
-        self._tools.append({
-            "name": name,
-            "description": description,
-            "parameters": parameters,
-        })
+        self._tools.append(
+            {
+                "name": name,
+                "description": description,
+                "parameters": parameters,
+            }
+        )
 
     def get_tools(self) -> List[Dict[str, Any]]:
         return self._tools.copy()
 
-    def _build_messages(self, user_prompt: str,
-                        context: Optional[Dict[str, Any]] = None) -> List[Dict[str, str]]:
+    def _build_messages(
+        self, user_prompt: str, context: Optional[Dict[str, Any]] = None
+    ) -> List[Dict[str, str]]:
         messages = [{"role": "system", "content": self.get_system_prompt()}]
 
         if context:
@@ -87,23 +91,33 @@ class BaseAgent(ABC):
                 else:
                     context_parts.append(f"{key}: {str(value)[:500]}")
             if context_parts:
-                messages.append({
-                    "role": "system",
-                    "content": "Context:\n" + "\n".join(context_parts)
-                })
+                messages.append(
+                    {
+                        "role": "system",
+                        "content": "Context:\n" + "\n".join(context_parts),
+                    }
+                )
 
         messages.append({"role": "user", "content": user_prompt})
         return messages
 
-    def _call_model(self, messages: List[Dict[str, str]],
-                    task_type: str = "chat",
-                    temperature: float = 0.7,
-                    max_tokens: int = 2000) -> Dict[str, Any]:
+    def _call_model(
+        self,
+        messages: List[Dict[str, str]],
+        task_type: str = "chat",
+        temperature: float = 0.7,
+        max_tokens: int = 2000,
+    ) -> Dict[str, Any]:
         if self.model_router is None:
             raise RuntimeError("Model router not initialized")
 
         from backend.services.model_router import TaskType
-        task_enum = TaskType(task_type) if task_type in [t.value for t in TaskType] else TaskType.CHAT
+
+        task_enum = (
+            TaskType(task_type)
+            if task_type in [t.value for t in TaskType]
+            else TaskType.CHAT
+        )
 
         return self.model_router.chat(
             task_type=task_enum,
@@ -112,10 +126,14 @@ class BaseAgent(ABC):
             max_tokens=max_tokens,
         )
 
-    def _create_result(self, success: bool, data: Optional[Dict[str, Any]] = None,
-                       error: Optional[str] = None,
-                       model_response: Optional[Dict[str, Any]] = None,
-                       duration: float = 0.0) -> AgentResult:
+    def _create_result(
+        self,
+        success: bool,
+        data: Optional[Dict[str, Any]] = None,
+        error: Optional[str] = None,
+        model_response: Optional[Dict[str, Any]] = None,
+        duration: float = 0.0,
+    ) -> AgentResult:
         return AgentResult(
             success=success,
             data=data or {},
@@ -123,9 +141,11 @@ class BaseAgent(ABC):
             agent_role=self.role.value,
             model_used=model_response.get("model", "") if model_response else "",
             tokens_used=(
-                model_response.get("usage", {}).get("input_tokens", 0) +
-                model_response.get("usage", {}).get("output_tokens", 0)
-            ) if model_response else 0,
+                model_response.get("usage", {}).get("input_tokens", 0)
+                + model_response.get("usage", {}).get("output_tokens", 0)
+            )
+            if model_response
+            else 0,
             cost_usd=model_response.get("cost_usd", 0.0) if model_response else 0.0,
             duration_seconds=duration,
         )

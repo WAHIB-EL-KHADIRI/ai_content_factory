@@ -89,11 +89,17 @@ class AppConfig:
         config.redis.host = os.getenv("REDIS_HOST", config.redis.host)
         config.redis.port = int(os.getenv("REDIS_PORT", str(config.redis.port)))
         config.redis.enabled = os.getenv("REDIS_ENABLED", "false").lower() == "true"
-        config.models.default_provider = os.getenv("DEFAULT_MODEL_PROVIDER", config.models.default_provider)
+        config.models.default_provider = os.getenv(
+            "DEFAULT_MODEL_PROVIDER", config.models.default_provider
+        )
         return config
 
     def ensure_dirs(self):
-        for d in [self.storage.upload_dir, self.storage.cache_dir, self.storage.output_dir]:
+        for d in [
+            self.storage.upload_dir,
+            self.storage.cache_dir,
+            self.storage.output_dir,
+        ]:
             Path(d).mkdir(parents=True, exist_ok=True)
 
 

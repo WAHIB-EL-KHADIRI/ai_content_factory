@@ -13,7 +13,9 @@ logger = logging.getLogger(__name__)
 class TranslatorAgent(BaseAgent):
     role = AgentRole.TRANSLATOR
     name = "Translator Agent"
-    description = "Translates content between languages while preserving tone and context"
+    description = (
+        "Translates content between languages while preserving tone and context"
+    )
 
     def get_system_prompt(self) -> str:
         return """You are an expert translator and localization specialist.
@@ -31,8 +33,9 @@ Supported languages: English, Arabic, Spanish, French, German, Portuguese, Chine
 
 Always provide accurate, natural translations. Respond in valid JSON format."""
 
-    async def execute(self, task: Dict[str, Any],
-                      context: Optional[Dict[str, Any]] = None) -> AgentResult:
+    async def execute(
+        self, task: Dict[str, Any], context: Optional[Dict[str, Any]] = None
+    ) -> AgentResult:
         start = time.time()
 
         content = task.get("content", "")

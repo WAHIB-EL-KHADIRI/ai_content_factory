@@ -13,7 +13,9 @@ logger = logging.getLogger(__name__)
 class DesignerAgent(BaseAgent):
     role = AgentRole.DESIGNER
     name = "Designer Agent"
-    description = "Creates visual content, generates image prompts, and manages design assets"
+    description = (
+        "Creates visual content, generates image prompts, and manages design assets"
+    )
 
     def get_system_prompt(self) -> str:
         return """You are an expert visual designer and AI image prompt engineer.
@@ -35,8 +37,9 @@ When creating prompts, include:
 
 Respond in valid JSON format."""
 
-    async def execute(self, task: Dict[str, Any],
-                      context: Optional[Dict[str, Any]] = None) -> AgentResult:
+    async def execute(
+        self, task: Dict[str, Any], context: Optional[Dict[str, Any]] = None
+    ) -> AgentResult:
         start = time.time()
 
         design_type = task.get("design_type", "image_prompt")
@@ -44,7 +47,9 @@ Respond in valid JSON format."""
         style = task.get("style", "cinematic")
         dimensions = task.get("dimensions", "1920x1080")
 
-        prompt = self._build_design_prompt(design_type, content, style, dimensions, context)
+        prompt = self._build_design_prompt(
+            design_type, content, style, dimensions, context
+        )
         messages = self._build_messages(prompt, context)
 
         try:
@@ -70,9 +75,14 @@ Respond in valid JSON format."""
                 success=False, error=str(e), duration=time.time() - start
             )
 
-    def _build_design_prompt(self, design_type: str, content: str,
-                             style: str, dimensions: str,
-                             context: Optional[Dict[str, Any]]) -> str:
+    def _build_design_prompt(
+        self,
+        design_type: str,
+        content: str,
+        style: str,
+        dimensions: str,
+        context: Optional[Dict[str, Any]],
+    ) -> str:
         brand_context = ""
         if context and "brand" in context:
             brand = context["brand"]

@@ -30,8 +30,9 @@ Your expertise covers:
 Always provide specific, actionable recommendations with priority levels.
 Respond in valid JSON format."""
 
-    async def execute(self, task: Dict[str, Any],
-                      context: Optional[Dict[str, Any]] = None) -> AgentResult:
+    async def execute(
+        self, task: Dict[str, Any], context: Optional[Dict[str, Any]] = None
+    ) -> AgentResult:
         start = time.time()
 
         action = task.get("action", "analyze")
@@ -50,8 +51,9 @@ Respond in valid JSON format."""
         result.duration_seconds = time.time() - start
         return result
 
-    async def _analyze_content(self, content: str, keywords: list,
-                               context: Optional[Dict[str, Any]]) -> AgentResult:
+    async def _analyze_content(
+        self, content: str, keywords: list, context: Optional[Dict[str, Any]]
+    ) -> AgentResult:
         prompt = f"""Analyze this content for SEO optimization:
 
 Content:
@@ -121,8 +123,9 @@ Provide a comprehensive SEO analysis as JSON:
             logger.error(f"SEO analysis failed: {e}")
             return self._create_result(success=False, error=str(e))
 
-    async def _optimize_content(self, content: str, keywords: list,
-                                context: Optional[Dict[str, Any]]) -> AgentResult:
+    async def _optimize_content(
+        self, content: str, keywords: list, context: Optional[Dict[str, Any]]
+    ) -> AgentResult:
         prompt = f"""Optimize this content for SEO:
 
 Original Content:
@@ -162,8 +165,9 @@ Provide the optimized content as JSON:
             logger.error(f"SEO optimization failed: {e}")
             return self._create_result(success=False, error=str(e))
 
-    async def _research_keywords(self, topic: str,
-                                 context: Optional[Dict[str, Any]]) -> AgentResult:
+    async def _research_keywords(
+        self, topic: str, context: Optional[Dict[str, Any]]
+    ) -> AgentResult:
         prompt = f"""Research keywords for the topic: {topic}
 
 Provide keyword research as JSON:

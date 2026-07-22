@@ -33,7 +33,9 @@ _delivery_counter = 0
 class WebhookCreateRequest(BaseModel):
     url: HttpUrl
     events: List[str] = Field(..., min_length=1, description="Events to subscribe to")
-    secret: Optional[str] = Field(default=None, description="Secret for signature verification")
+    secret: Optional[str] = Field(
+        default=None, description="Secret for signature verification"
+    )
     description: str = ""
     is_active: bool = True
 
@@ -52,7 +54,7 @@ def _validate_events(events: List[str]) -> None:
         raise HTTPException(
             status_code=422,
             detail=f"Invalid events: {', '.join(sorted(invalid))}. "
-                   f"Valid events: {', '.join(sorted(VALID_EVENTS))}",
+            f"Valid events: {', '.join(sorted(VALID_EVENTS))}",
         )
 
 
@@ -327,7 +329,9 @@ async def _deliver_webhook(
     webhook["delivery_count"] = webhook.get("delivery_count", 0) + 1
 
     if delivery_status == "success":
-        logger.info("Webhook %s delivered: %s -> %d", delivery_id, event, status_code or 0)
+        logger.info(
+            "Webhook %s delivered: %s -> %d", delivery_id, event, status_code or 0
+        )
     else:
         logger.warning("Webhook %s failed: %s -> %s", delivery_id, event, error_message)
 

@@ -11,11 +11,16 @@ class WorkflowBuilder:
         self._variables: Dict[str, Any] = {}
         self._triggers: Dict[str, Any] = {}
 
-    def add_step(self, name: str, agent_role: str, task: Dict[str, Any],
-                 conditions: Optional[List[Dict[str, Any]]] = None,
-                 requires_approval: bool = False,
-                 retry_config: Optional[Dict[str, Any]] = None,
-                 output_key: Optional[str] = None) -> "WorkflowBuilder":
+    def add_step(
+        self,
+        name: str,
+        agent_role: str,
+        task: Dict[str, Any],
+        conditions: Optional[List[Dict[str, Any]]] = None,
+        requires_approval: bool = False,
+        retry_config: Optional[Dict[str, Any]] = None,
+        output_key: Optional[str] = None,
+    ) -> "WorkflowBuilder":
         step = {
             "name": name,
             "agent_role": agent_role,
@@ -28,15 +33,18 @@ class WorkflowBuilder:
         self._steps.append(step)
         return self
 
-    def add_condition(self, step_name: str, condition_type: str,
-                      key: str, value: Any = None) -> "WorkflowBuilder":
+    def add_condition(
+        self, step_name: str, condition_type: str, key: str, value: Any = None
+    ) -> "WorkflowBuilder":
         for step in self._steps:
             if step["name"] == step_name:
-                step["conditions"].append({
-                    "type": condition_type,
-                    "key": key,
-                    "value": value,
-                })
+                step["conditions"].append(
+                    {
+                        "type": condition_type,
+                        "key": key,
+                        "value": value,
+                    }
+                )
                 break
         return self
 
@@ -161,7 +169,10 @@ class WorkflowBuilder:
         ).add_step(
             name="design",
             agent_role="designer",
-            task={"design_type": "social_media", "content": "{{create_content_result}}"},
+            task={
+                "design_type": "social_media",
+                "content": "{{create_content_result}}",
+            },
         ).add_step(
             name="optimize",
             agent_role="seo",

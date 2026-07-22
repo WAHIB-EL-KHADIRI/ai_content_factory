@@ -120,14 +120,17 @@ async def websocket_endpoint(
 
     await manager.connect(websocket, channel)
 
-    await manager.send_personal(websocket, {
-        "type": "connected",
-        "payload": {
-            "channel": channel,
-            "user_id": user_id,
-            "message": f"Connected to {channel} channel",
+    await manager.send_personal(
+        websocket,
+        {
+            "type": "connected",
+            "payload": {
+                "channel": channel,
+                "user_id": user_id,
+                "message": f"Connected to {channel} channel",
+            },
         },
-    })
+    )
 
     try:
         while True:
@@ -135,33 +138,48 @@ async def websocket_endpoint(
             try:
                 data = json.loads(raw)
             except json.JSONDecodeError:
-                await manager.send_personal(websocket, {
-                    "type": "error",
-                    "payload": {"message": "Invalid JSON"},
-                })
+                await manager.send_personal(
+                    websocket,
+                    {
+                        "type": "error",
+                        "payload": {"message": "Invalid JSON"},
+                    },
+                )
                 continue
 
             msg_type = data.get("type", "message")
 
             if msg_type == "ping":
-                await manager.send_personal(websocket, {
-                    "type": "pong",
-                    "payload": {},
-                })
+                await manager.send_personal(
+                    websocket,
+                    {
+                        "type": "pong",
+                        "payload": {},
+                    },
+                )
             elif msg_type == "broadcast":
-                count = await manager.broadcast(channel, {
-                    "type": "message",
-                    "payload": data.get("payload", {}),
-                })
-                await manager.send_personal(websocket, {
-                    "type": "broadcast_sent",
-                    "payload": {"channel": channel, "recipient_count": count},
-                })
+                count = await manager.broadcast(
+                    channel,
+                    {
+                        "type": "message",
+                        "payload": data.get("payload", {}),
+                    },
+                )
+                await manager.send_personal(
+                    websocket,
+                    {
+                        "type": "broadcast_sent",
+                        "payload": {"channel": channel, "recipient_count": count},
+                    },
+                )
             else:
-                await manager.broadcast(channel, {
-                    "type": msg_type,
-                    "payload": data.get("payload", data),
-                })
+                await manager.broadcast(
+                    channel,
+                    {
+                        "type": msg_type,
+                        "payload": data.get("payload", data),
+                    },
+                )
 
     except WebSocketDisconnect:
         await manager.disconnect(websocket, channel)

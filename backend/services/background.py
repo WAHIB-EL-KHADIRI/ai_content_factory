@@ -44,7 +44,9 @@ class BackgroundTask:
             "error": self.error,
             "created_at": self.created_at.isoformat(),
             "started_at": self.started_at.isoformat() if self.started_at else None,
-            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "completed_at": self.completed_at.isoformat()
+            if self.completed_at
+            else None,
             "timeout": self.timeout,
         }
 
@@ -52,7 +54,9 @@ class BackgroundTask:
 class TaskQueue:
     """Async task queue with configurable concurrency and timeout support."""
 
-    def __init__(self, max_concurrent: int = 5, default_timeout: Optional[float] = None):
+    def __init__(
+        self, max_concurrent: int = 5, default_timeout: Optional[float] = None
+    ):
         self.max_concurrent = max_concurrent
         self.default_timeout = default_timeout
         self._tasks: Dict[str, BackgroundTask] = {}

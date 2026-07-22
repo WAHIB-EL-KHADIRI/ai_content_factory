@@ -141,6 +141,7 @@ class PluginLoader:
 
     def load_from_directory(self, directory: str) -> int:
         import os
+
         loaded = 0
 
         if not os.path.isdir(directory):

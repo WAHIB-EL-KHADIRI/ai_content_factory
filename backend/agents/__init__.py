@@ -1,4 +1,5 @@
 """Multi-Agent system"""
+
 from .base import BaseAgent, AgentRole, AgentResult
 from .router import AgentRouter
 from .research import ResearchAgent
@@ -11,7 +12,16 @@ from .publisher import PublisherAgent
 from .reviewer import ReviewAgent
 
 __all__ = [
-    'BaseAgent', 'AgentRole', 'AgentResult', 'AgentRouter',
-    'ResearchAgent', 'WriterAgent', 'SEOAgent', 'EditorAgent',
-    'TranslatorAgent', 'DesignerAgent', 'PublisherAgent', 'ReviewAgent'
+    "BaseAgent",
+    "AgentRole",
+    "AgentResult",
+    "AgentRouter",
+    "ResearchAgent",
+    "WriterAgent",
+    "SEOAgent",
+    "EditorAgent",
+    "TranslatorAgent",
+    "DesignerAgent",
+    "PublisherAgent",
+    "ReviewAgent",
 ]

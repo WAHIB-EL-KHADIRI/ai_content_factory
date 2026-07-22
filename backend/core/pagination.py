@@ -15,7 +15,9 @@ class PaginationParams(BaseModel):
     page: int = Field(default=1, ge=1, description="Page number")
     page_size: int = Field(default=20, ge=1, le=100, description="Items per page")
     sort_by: Optional[str] = Field(default=None, description="Field to sort by")
-    sort_order: str = Field(default="desc", pattern="^(asc|desc)$", description="Sort direction")
+    sort_order: str = Field(
+        default="desc", pattern="^(asc|desc)$", description="Sort direction"
+    )
 
 
 class PaginatedResponse(BaseModel, Generic[ModelType]):
@@ -30,7 +32,9 @@ class PaginatedResponse(BaseModel, Generic[ModelType]):
 
 class SearchFilter(BaseModel):
     query: Optional[str] = Field(default=None, description="Full-text search query")
-    filters: Dict[str, Any] = Field(default_factory=dict, description="Field-specific filters")
+    filters: Dict[str, Any] = Field(
+        default_factory=dict, description="Field-specific filters"
+    )
     date_from: Optional[datetime] = Field(default=None, description="Start date filter")
     date_to: Optional[datetime] = Field(default=None, description="End date filter")
 

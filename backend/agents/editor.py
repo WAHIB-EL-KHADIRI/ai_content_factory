@@ -31,8 +31,9 @@ Provide specific, actionable feedback with line-level suggestions.
 Always return the corrected content alongside your feedback.
 Respond in valid JSON format."""
 
-    async def execute(self, task: Dict[str, Any],
-                      context: Optional[Dict[str, Any]] = None) -> AgentResult:
+    async def execute(
+        self, task: Dict[str, Any], context: Optional[Dict[str, Any]] = None
+    ) -> AgentResult:
         start = time.time()
 
         content = task.get("content", "")
@@ -65,8 +66,13 @@ Respond in valid JSON format."""
                 success=False, error=str(e), duration=time.time() - start
             )
 
-    def _build_edit_prompt(self, content: str, edit_type: str,
-                           style_guide: str, context: Optional[Dict[str, Any]]) -> str:
+    def _build_edit_prompt(
+        self,
+        content: str,
+        edit_type: str,
+        style_guide: str,
+        context: Optional[Dict[str, Any]],
+    ) -> str:
         brand_context = ""
         if context and "brand" in context:
             brand = context["brand"]

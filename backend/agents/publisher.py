@@ -28,8 +28,9 @@ Your capabilities:
 
 Respond in valid JSON format."""
 
-    async def execute(self, task: Dict[str, Any],
-                      context: Optional[Dict[str, Any]] = None) -> AgentResult:
+    async def execute(
+        self, task: Dict[str, Any], context: Optional[Dict[str, Any]] = None
+    ) -> AgentResult:
         start = time.time()
 
         action = task.get("action", "format")
@@ -48,8 +49,9 @@ Respond in valid JSON format."""
         result.duration_seconds = time.time() - start
         return result
 
-    async def _format_content(self, content: str, platforms: list,
-                              context: Optional[Dict[str, Any]]) -> AgentResult:
+    async def _format_content(
+        self, content: str, platforms: list, context: Optional[Dict[str, Any]]
+    ) -> AgentResult:
         prompt = f"""Format this content for multiple platforms:
 
 Content:
@@ -111,8 +113,9 @@ Provide formatted versions as JSON:
             logger.error(f"Publisher format failed: {e}")
             return self._create_result(success=False, error=str(e))
 
-    async def _suggest_schedule(self, content: str,
-                                context: Optional[Dict[str, Any]]) -> AgentResult:
+    async def _suggest_schedule(
+        self, content: str, context: Optional[Dict[str, Any]]
+    ) -> AgentResult:
         prompt = f"""Suggest an optimal publishing schedule for this content:
 
 Content: {content[:500]}
@@ -149,8 +152,9 @@ Provide schedule as JSON:
         except Exception as e:
             return self._create_result(success=False, error=str(e))
 
-    async def _create_distribution_plan(self, content: str, platforms: list,
-                                        context: Optional[Dict[str, Any]]) -> AgentResult:
+    async def _create_distribution_plan(
+        self, content: str, platforms: list, context: Optional[Dict[str, Any]]
+    ) -> AgentResult:
         prompt = f"""Create a content distribution plan:
 
 Content: {content[:500]}
