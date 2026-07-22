@@ -102,5 +102,5 @@ alembic/versions/*.pyc
 data/
 uploads/
 
-# OpenHands workspace secrets
-workspace/.openhands/
+# TypeScript incremental build cache
+*.tsbuildinfo

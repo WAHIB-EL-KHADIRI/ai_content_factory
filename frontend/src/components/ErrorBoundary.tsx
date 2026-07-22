@@ -61,7 +61,7 @@ export default class ErrorBoundary extends Component<Props, State> {
                 Try Again
               </button>
               <a
-                href="https://github.com/anomalyco/opencode/issues"
+                href="https://github.com/WAHIB-EL-KHADIRI/ai_content_factory/issues"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-secondary flex items-center gap-2"
