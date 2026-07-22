@@ -4,7 +4,7 @@
 fastapi==0.115.0
 uvicorn[standard]==0.30.6
 pydantic==2.9.2
-python-multipart==0.0.9
+python-multipart==0.0.31
 
 # Database
 sqlalchemy==2.0.35
@@ -12,11 +12,11 @@ aiosqlite==0.20.0
 alembic==1.13.2
 
 # Configuration
-python-dotenv==1.0.1
+python-dotenv==1.2.2
 PyYAML==6.0.2
 
 # HTTP Client
-requests==2.32.3
+requests==2.33.0
 
 # OpenAI compatible (DeepSeek, etc.)
 openai==1.51.0
@@ -28,7 +28,7 @@ anthropic==0.37.1
 elevenlabs==1.54.0
 
 # Image Generation
-Pillow==10.4.0
+Pillow==12.3.0
 
 # Video Assembly
 moviepy==1.0.3
@@ -36,5 +36,5 @@ pydub==0.25.1
 
 # Utilities
 tqdm==4.66.5
-python-jose[cryptography]==3.3.0
+python-jose[cryptography]==3.4.0
 passlib[bcrypt]==1.7.4
