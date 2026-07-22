@@ -12,44 +12,66 @@ class MetricsCollector:
     def __init__(self):
         self._metrics: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
 
-    def record(self, metric_type: str, value: float, metadata: Optional[Dict[str, Any]] = None):
-        self._metrics[metric_type].append({
-            "value": value,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "metadata": metadata or {},
-        })
+    def record(
+        self, metric_type: str, value: float, metadata: Optional[Dict[str, Any]] = None
+    ):
+        self._metrics[metric_type].append(
+            {
+                "value": value,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "metadata": metadata or {},
+            }
+        )
 
-    def record_cost(self, model: str, provider: str, cost_usd: float,
-                    tokens: int, task_type: str = ""):
-        self.record("cost", cost_usd, {
-            "model": model,
-            "provider": provider,
-            "tokens": tokens,
-            "task_type": task_type,
-        })
+    def record_cost(
+        self,
+        model: str,
+        provider: str,
+        cost_usd: float,
+        tokens: int,
+        task_type: str = "",
+    ):
+        self.record(
+            "cost",
+            cost_usd,
+            {
+                "model": model,
+                "provider": provider,
+                "tokens": tokens,
+                "task_type": task_type,
+            },
+        )
 
-    def record_latency(self, operation: str, latency_ms: float,
-                       success: bool = True):
-        self.record("latency", latency_ms, {
-            "operation": operation,
-            "success": success,
-        })
+    def record_latency(self, operation: str, latency_ms: float, success: bool = True):
+        self.record(
+            "latency",
+            latency_ms,
+            {
+                "operation": operation,
+                "success": success,
+            },
+        )
 
-    def record_quality(self, content_id: str, score: float,
-                       review_type: str = ""):
-        self.record("quality", score, {
-            "content_id": content_id,
-            "review_type": review_type,
-        })
+    def record_quality(self, content_id: str, score: float, review_type: str = ""):
+        self.record(
+            "quality",
+            score,
+            {
+                "content_id": content_id,
+                "review_type": review_type,
+            },
+        )
 
-    def record_content_metric(self, metric_name: str, value: float,
-                              content_id: str = ""):
+    def record_content_metric(
+        self, metric_name: str, value: float, content_id: str = ""
+    ):
         self.record(metric_name, value, {"content_id": content_id})
 
     def get_summary(self, metric_type: str, hours: int = 24) -> Dict[str, Any]:
         cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
         records = [
-            r for r in self._metrics.get(metric_type, [])
+            r
+            for r in self._metrics.get(metric_type, [])
             if datetime.fromisoformat(r["timestamp"]) > cutoff
         ]
 
@@ -68,13 +90,14 @@ class MetricsCollector:
     def get_cost_breakdown(self, hours: int = 24) -> Dict[str, Any]:
         cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
         cost_records = [
-            r for r in self._metrics.get("cost", [])
+            r
+            for r in self._metrics.get("cost", [])
             if datetime.fromisoformat(r["timestamp"]) > cutoff
         ]
 
-        by_model = defaultdict(float)
-        by_provider = defaultdict(float)
-        by_task = defaultdict(float)
+        by_model: Dict[str, float] = defaultdict(float)
+        by_provider: Dict[str, float] = defaultdict(float)
+        by_task: Dict[str, float] = defaultdict(float)
         total = 0
 
         for record in cost_records:
@@ -111,15 +134,24 @@ class AnalyticsEngine:
         self.db = db
         self.collector = MetricsCollector()
 
-    def track_generation(self, model: str, provider: str, task_type: str,
-                         input_tokens: int, output_tokens: int, cost_usd: float,
-                         latency_ms: float, success: bool = True):
+    def track_generation(
+        self,
+        model: str,
+        provider: str,
+        task_type: str,
+        input_tokens: int,
+        output_tokens: int,
+        cost_usd: float,
+        latency_ms: float,
+        success: bool = True,
+    ):
         total_tokens = input_tokens + output_tokens
         self.collector.record_cost(model, provider, cost_usd, total_tokens, task_type)
         self.collector.record_latency(f"generation:{task_type}", latency_ms, success)
 
         if self.db:
             from backend.db.models import UsageRecord
+
             record = UsageRecord(
                 model_provider=provider,
                 model_name=model,
@@ -134,12 +166,14 @@ class AnalyticsEngine:
             self.db.add(record)
             self.db.commit()
 
-    def track_content_quality(self, content_id: str, score: float,
-                              review_type: str = "comprehensive"):
+    def track_content_quality(
+        self, content_id: str, score: float, review_type: str = "comprehensive"
+    ):
         self.collector.record_quality(content_id, score, review_type)
 
         if self.db:
             from backend.db.models import ContentAnalytics
+
             analytics = ContentAnalytics(
                 content_id=content_id,
                 metric_type="quality_score",
@@ -152,28 +186,48 @@ class AnalyticsEngine:
     def track_seo_score(self, content_id: str, score: float):
         self.collector.record_content_metric("seo_score", score, content_id)
 
-    def track_workflow_run(self, workflow_id: str, status: str,
-                           duration_seconds: float, steps_completed: int):
-        self.collector.record_content_metric("workflow_duration", duration_seconds, workflow_id)
-        self.collector.record("workflow_runs", 1, {
-            "workflow_id": workflow_id,
-            "status": status,
-            "steps_completed": steps_completed,
-        })
+    def track_workflow_run(
+        self,
+        workflow_id: str,
+        status: str,
+        duration_seconds: float,
+        steps_completed: int,
+    ):
+        self.collector.record_content_metric(
+            "workflow_duration", duration_seconds, workflow_id
+        )
+        self.collector.record(
+            "workflow_runs",
+            1,
+            {
+                "workflow_id": workflow_id,
+                "status": status,
+                "steps_completed": steps_completed,
+            },
+        )
 
-    def get_dashboard_data(self, project_id: Optional[str] = None,
-                           hours: int = 24) -> Dict[str, Any]:
+    def get_dashboard_data(
+        self, project_id: Optional[str] = None, hours: int = 24
+    ) -> Dict[str, Any]:
         report = self.collector.get_performance_report(hours)
 
         if self.db:
             from backend.db.models import Content, WorkflowRun
-            content_count = self.db.query(Content).filter(
-                Content.project_id == project_id
-            ).count() if project_id else self.db.query(Content).count()
 
-            workflow_runs = self.db.query(WorkflowRun).filter(
-                WorkflowRun.created_at > datetime.now(timezone.utc) - timedelta(hours=hours)
-            ).count()
+            content_count = (
+                self.db.query(Content).filter(Content.project_id == project_id).count()
+                if project_id
+                else self.db.query(Content).count()
+            )
+
+            workflow_runs = (
+                self.db.query(WorkflowRun)
+                .filter(
+                    WorkflowRun.created_at
+                    > datetime.now(timezone.utc) - timedelta(hours=hours)
+                )
+                .count()
+            )
 
             report["content_count"] = content_count
             report["workflow_runs"] = workflow_runs
@@ -183,8 +237,9 @@ class AnalyticsEngine:
 
         return report
 
-    def get_usage_report(self, user_id: Optional[str] = None,
-                         project_id: Optional[str] = None) -> Dict[str, Any]:
+    def get_usage_report(
+        self, user_id: Optional[str] = None, project_id: Optional[str] = None
+    ) -> Dict[str, Any]:
         if self.db:
             from backend.db.models import UsageRecord
             from sqlalchemy import func

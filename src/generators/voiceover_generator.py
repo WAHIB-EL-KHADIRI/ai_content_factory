@@ -4,7 +4,7 @@ Voiceover Generator with support for multiple TTS providers
 
 import os
 import logging
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Optional, Tuple
 from pathlib import Path
 
 from src.utils.utils import retry_with_backoff, generate_cache_key, get_cached_file, file_exists_and_valid
@@ -32,7 +32,7 @@ class VoiceoverGenerator:
         
         logger.info(f"VoiceoverGenerator initialized with provider: {self.provider}")
     
-    def generate_audio(self, text: str, output_path: str = None, mock: bool = False) -> Tuple[str, float]:
+    def generate_audio(self, text: str, output_path: Optional[str] = None, mock: bool = False) -> Tuple[str, float]:
         """
         Generate audio from text
         
@@ -83,21 +83,21 @@ class VoiceoverGenerator:
     def _generate_elevenlabs(self, text: str, output_path: str):
         """Generate audio using ElevenLabs"""
         try:
-            from elevenlabs import generate, save
-            
+            from elevenlabs import ElevenLabs, save
+
             config = self.tts_config.get('elevenlabs', {})
-            
+            client = ElevenLabs(api_key=config.get('api_key'))
+
             def api_call():
-                audio = generate(
+                audio = client.text_to_speech.convert(
+                    voice_id=config.get('voice_id', '21m00Tcm4TlvDq8ikWAM'),
                     text=text,
-                    voice=config.get('voice_id', '21m00Tcm4TlvDq8ikWAM'),
-                    model=config.get('model_id', 'eleven_multilingual_v2'),
-                    api_key=config.get('api_key')
+                    model_id=config.get('model_id', 'eleven_multilingual_v2'),
                 )
                 save(audio, output_path)
-            
+
             retry_with_backoff(api_call)
-            
+
         except ImportError:
             logger.error("ElevenLabs library not installed. Install with: pip install elevenlabs")
             raise

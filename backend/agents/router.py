@@ -55,14 +55,23 @@ class AgentRouter:
 
         return self._agents[role]
 
-    async def run_single(self, role: AgentRole, task: Dict[str, Any],
-                         context: Optional[Dict[str, Any]] = None) -> AgentResult:
+    async def run_single(
+        self,
+        role: AgentRole,
+        task: Dict[str, Any],
+        context: Optional[Dict[str, Any]] = None,
+    ) -> AgentResult:
         agent = self.get_agent(role)
-        logger.info(f"Running {agent.name} for task: {task.get('task_type', 'default')}")
+        logger.info(
+            f"Running {agent.name} for task: {task.get('task_type', 'default')}"
+        )
         return await agent.execute(task, context)
 
-    async def run_pipeline(self, steps: List[Dict[str, Any]],
-                           initial_context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def run_pipeline(
+        self,
+        steps: List[Dict[str, Any]],
+        initial_context: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         context = initial_context or {}
         results = {}
         total_cost = 0.0
@@ -94,10 +103,14 @@ class AgentRouter:
             "total_tokens": total_tokens,
         }
 
-    async def run_content_pipeline(self, topic: str, content_type: str = "article",
-                                   brand: Optional[Dict[str, Any]] = None,
-                                   language: str = "en") -> Dict[str, Any]:
-        context = {"topic": topic, "content_type": content_type}
+    async def run_content_pipeline(
+        self,
+        topic: str,
+        content_type: str = "article",
+        brand: Optional[Dict[str, Any]] = None,
+        language: str = "en",
+    ) -> Dict[str, Any]:
+        context: Dict[str, Any] = {"topic": topic, "content_type": content_type}
         if brand:
             context["brand"] = brand
 

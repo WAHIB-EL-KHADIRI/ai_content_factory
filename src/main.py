@@ -7,7 +7,7 @@ This script coordinates all components to generate videos from topics.
 import sys
 import argparse
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from tqdm import tqdm
 
 from src.utils import load_config, setup_logging, ensure_directories
@@ -43,7 +43,7 @@ class VideoGenerationPipeline:
         
         self.logger.info("Pipeline initialized successfully")
     
-    def generate_video(self, topic: str, output_filename: str = None, mock: bool = False) -> str:
+    def generate_video(self, topic: str, output_filename: Optional[str] = None, mock: bool = False) -> str:
         """
         Generate a complete video from a topic
         

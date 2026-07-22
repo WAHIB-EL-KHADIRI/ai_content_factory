@@ -46,40 +46,76 @@ class ModelInfo:
 
 MODELS: Dict[str, ModelInfo] = {
     "gpt-4o": ModelInfo(
-        provider="openai", model="gpt-4o", tier=ModelTier.PREMIUM,
-        cost_per_1k_input=0.005, cost_per_1k_output=0.015,
-        max_tokens=128000, supports_vision=True, supports_function_calling=True,
-        latency_rating=7, quality_rating=9
+        provider="openai",
+        model="gpt-4o",
+        tier=ModelTier.PREMIUM,
+        cost_per_1k_input=0.005,
+        cost_per_1k_output=0.015,
+        max_tokens=128000,
+        supports_vision=True,
+        supports_function_calling=True,
+        latency_rating=7,
+        quality_rating=9,
     ),
     "gpt-4o-mini": ModelInfo(
-        provider="openai", model="gpt-4o-mini", tier=ModelTier.FAST,
-        cost_per_1k_input=0.00015, cost_per_1k_output=0.0006,
-        max_tokens=128000, supports_vision=True, supports_function_calling=True,
-        latency_rating=9, quality_rating=7
+        provider="openai",
+        model="gpt-4o-mini",
+        tier=ModelTier.FAST,
+        cost_per_1k_input=0.00015,
+        cost_per_1k_output=0.0006,
+        max_tokens=128000,
+        supports_vision=True,
+        supports_function_calling=True,
+        latency_rating=9,
+        quality_rating=7,
     ),
     "claude-sonnet-4-20250514": ModelInfo(
-        provider="anthropic", model="claude-sonnet-4-20250514", tier=ModelTier.PREMIUM,
-        cost_per_1k_input=0.003, cost_per_1k_output=0.015,
-        max_tokens=200000, supports_vision=True, supports_function_calling=True,
-        latency_rating=6, quality_rating=10
+        provider="anthropic",
+        model="claude-sonnet-4-20250514",
+        tier=ModelTier.PREMIUM,
+        cost_per_1k_input=0.003,
+        cost_per_1k_output=0.015,
+        max_tokens=200000,
+        supports_vision=True,
+        supports_function_calling=True,
+        latency_rating=6,
+        quality_rating=10,
     ),
     "claude-haiku-4-20250414": ModelInfo(
-        provider="anthropic", model="claude-haiku-4-20250414", tier=ModelTier.FAST,
-        cost_per_1k_input=0.00025, cost_per_1k_output=0.00125,
-        max_tokens=200000, supports_vision=False, supports_function_calling=True,
-        latency_rating=9, quality_rating=7
+        provider="anthropic",
+        model="claude-haiku-4-20250414",
+        tier=ModelTier.FAST,
+        cost_per_1k_input=0.00025,
+        cost_per_1k_output=0.00125,
+        max_tokens=200000,
+        supports_vision=False,
+        supports_function_calling=True,
+        latency_rating=9,
+        quality_rating=7,
     ),
     "deepseek-chat": ModelInfo(
-        provider="deepseek", model="deepseek-chat", tier=ModelTier.BALANCED,
-        cost_per_1k_input=0.00014, cost_per_1k_output=0.00028,
-        max_tokens=32000, supports_vision=False, supports_function_calling=True,
-        latency_rating=8, quality_rating=7
+        provider="deepseek",
+        model="deepseek-chat",
+        tier=ModelTier.BALANCED,
+        cost_per_1k_input=0.00014,
+        cost_per_1k_output=0.00028,
+        max_tokens=32000,
+        supports_vision=False,
+        supports_function_calling=True,
+        latency_rating=8,
+        quality_rating=7,
     ),
     "deepseek-reasoner": ModelInfo(
-        provider="deepseek", model="deepseek-reasoner", tier=ModelTier.BALANCED,
-        cost_per_1k_input=0.00055, cost_per_1k_output=0.00219,
-        max_tokens=64000, supports_vision=False, supports_function_calling=False,
-        latency_rating=5, quality_rating=8
+        provider="deepseek",
+        model="deepseek-reasoner",
+        tier=ModelTier.BALANCED,
+        cost_per_1k_input=0.00055,
+        cost_per_1k_output=0.00219,
+        max_tokens=64000,
+        supports_vision=False,
+        supports_function_calling=False,
+        latency_rating=5,
+        quality_rating=8,
     ),
 }
 
@@ -92,23 +128,33 @@ TASK_MODEL_PREFERENCES: Dict[TaskType, List[str]] = {
     TaskType.VISUAL_GENERATION: ["gpt-4o", "gpt-4o-mini"],
     TaskType.TTS: ["gpt-4o-mini"],
     TaskType.SUMMARIZATION: ["gpt-4o-mini", "claude-haiku-4-20250414", "deepseek-chat"],
-    TaskType.CLASSIFICATION: ["gpt-4o-mini", "claude-haiku-4-20250414", "deepseek-chat"],
+    TaskType.CLASSIFICATION: [
+        "gpt-4o-mini",
+        "claude-haiku-4-20250414",
+        "deepseek-chat",
+    ],
     TaskType.CHAT: ["gpt-4o-mini", "claude-haiku-4-20250414", "deepseek-chat"],
 }
 
 
 class ModelRouter:
-    def __init__(self, preferred_tier: Optional[ModelTier] = None,
-                 max_cost_per_task: Optional[float] = None):
+    def __init__(
+        self,
+        preferred_tier: Optional[ModelTier] = None,
+        max_cost_per_task: Optional[float] = None,
+    ):
         self.config = get_config()
         self.preferred_tier = preferred_tier
         self.max_cost_per_task = max_cost_per_task
         self._usage_stats: Dict[str, Dict[str, Any]] = {}
 
-    def select_model(self, task_type: TaskType,
-                     required_features: Optional[List[str]] = None,
-                     prefer_speed: bool = False,
-                     prefer_quality: bool = False) -> ModelInfo:
+    def select_model(
+        self,
+        task_type: TaskType,
+        required_features: Optional[List[str]] = None,
+        prefer_speed: bool = False,
+        prefer_quality: bool = False,
+    ) -> ModelInfo:
         preferences = TASK_MODEL_PREFERENCES.get(task_type, ["gpt-4o-mini"])
         candidates = []
 
@@ -123,11 +169,16 @@ class ModelRouter:
             if required_features:
                 if "vision" in required_features and not model.supports_vision:
                     continue
-                if "function_calling" in required_features and not model.supports_function_calling:
+                if (
+                    "function_calling" in required_features
+                    and not model.supports_function_calling
+                ):
                     continue
 
             if self.max_cost_per_task:
-                estimated_cost = (model.cost_per_1k_input + model.cost_per_1k_output) * 0.5
+                estimated_cost = (
+                    model.cost_per_1k_input + model.cost_per_1k_output
+                ) * 0.5
                 if estimated_cost > self.max_cost_per_task:
                     continue
 
@@ -151,29 +202,36 @@ class ModelRouter:
 
         if model.provider == "openai":
             from openai import OpenAI
+
             return OpenAI(api_key=config.models.openai_api_key)
 
         elif model.provider == "anthropic":
             import anthropic
+
             return anthropic.Anthropic(api_key=config.models.anthropic_api_key)
 
         elif model.provider == "deepseek":
             from openai import OpenAI
+
             return OpenAI(
                 api_key=config.models.deepseek_api_key,
-                base_url=config.models.deepseek_base_url
+                base_url=config.models.deepseek_base_url,
             )
 
         raise ValueError(f"Unsupported provider: {model.provider}")
 
-    def chat(self, task_type: TaskType, messages: List[Dict[str, str]],
-             temperature: float = 0.7, max_tokens: int = 2000,
-             prefer_speed: bool = False, prefer_quality: bool = False,
-             **kwargs) -> Dict[str, Any]:
+    def chat(
+        self,
+        task_type: TaskType,
+        messages: List[Dict[str, str]],
+        temperature: float = 0.7,
+        max_tokens: int = 2000,
+        prefer_speed: bool = False,
+        prefer_quality: bool = False,
+        **kwargs,
+    ) -> Dict[str, Any]:
         model = self.select_model(
-            task_type,
-            prefer_speed=prefer_speed,
-            prefer_quality=prefer_quality
+            task_type, prefer_speed=prefer_speed, prefer_quality=prefer_quality
         )
 
         start_time = time.time()
@@ -195,7 +253,7 @@ class ModelRouter:
                     temperature=temperature,
                     system=system_msg,
                     messages=user_messages,
-                    **kwargs
+                    **kwargs,
                 )
                 content = response.content[0].text
                 usage = {
@@ -208,7 +266,7 @@ class ModelRouter:
                     messages=messages,
                     temperature=temperature,
                     max_tokens=max_tokens,
-                    **kwargs
+                    **kwargs,
                 )
                 content = response.choices[0].message.content
                 usage = {
@@ -219,8 +277,8 @@ class ModelRouter:
             latency_ms = (time.time() - start_time) * 1000
             total_tokens = usage["input_tokens"] + usage["output_tokens"]
             cost = (
-                usage["input_tokens"] * model.cost_per_1k_input / 1000 +
-                usage["output_tokens"] * model.cost_per_1k_output / 1000
+                usage["input_tokens"] * model.cost_per_1k_input / 1000
+                + usage["output_tokens"] * model.cost_per_1k_output / 1000
             )
 
             self._track_usage(model, task_type, total_tokens, cost, latency_ms)
@@ -244,29 +302,36 @@ class ModelRouter:
 
         if model.provider == "openai":
             from openai import AsyncOpenAI
+
             return AsyncOpenAI(api_key=config.models.openai_api_key)
 
         elif model.provider == "anthropic":
             import anthropic
+
             return anthropic.AsyncAnthropic(api_key=config.models.anthropic_api_key)
 
         elif model.provider == "deepseek":
             from openai import AsyncOpenAI
+
             return AsyncOpenAI(
                 api_key=config.models.deepseek_api_key,
-                base_url=config.models.deepseek_base_url
+                base_url=config.models.deepseek_base_url,
             )
 
         raise ValueError(f"Unsupported provider: {model.provider}")
 
-    async def chat_stream(self, task_type: TaskType, messages: List[Dict[str, str]],
-                          temperature: float = 0.7, max_tokens: int = 2000,
-                          prefer_speed: bool = False, prefer_quality: bool = False,
-                          **kwargs):
+    async def chat_stream(
+        self,
+        task_type: TaskType,
+        messages: List[Dict[str, str]],
+        temperature: float = 0.7,
+        max_tokens: int = 2000,
+        prefer_speed: bool = False,
+        prefer_quality: bool = False,
+        **kwargs,
+    ):
         model = self.select_model(
-            task_type,
-            prefer_speed=prefer_speed,
-            prefer_quality=prefer_quality
+            task_type, prefer_speed=prefer_speed, prefer_quality=prefer_quality
         )
 
         start_time = time.time()
@@ -321,8 +386,8 @@ class ModelRouter:
             latency_ms = (time.time() - start_time) * 1000
             total_tokens = input_tokens + output_tokens
             cost = (
-                input_tokens * model.cost_per_1k_input / 1000 +
-                output_tokens * model.cost_per_1k_output / 1000
+                input_tokens * model.cost_per_1k_input / 1000
+                + output_tokens * model.cost_per_1k_output / 1000
             )
 
             self._track_usage(model, task_type, total_tokens, cost, latency_ms)
@@ -342,14 +407,22 @@ class ModelRouter:
             logger.error(f"Stream call failed: {model.provider}/{model.model}: {e}")
             yield {"type": "error", "error": str(e)}
 
-    def _track_usage(self, model: ModelInfo, task_type: TaskType,
-                     tokens: int, cost: float, latency_ms: float):
+    def _track_usage(
+        self,
+        model: ModelInfo,
+        task_type: TaskType,
+        tokens: int,
+        cost: float,
+        latency_ms: float,
+    ):
         key = f"{model.provider}:{model.model}"
         if key not in self._usage_stats:
             self._usage_stats[key] = {
-                "total_calls": 0, "total_tokens": 0,
-                "total_cost": 0.0, "total_latency_ms": 0.0,
-                "tasks": {}
+                "total_calls": 0,
+                "total_tokens": 0,
+                "total_cost": 0.0,
+                "total_latency_ms": 0.0,
+                "tasks": {},
             }
         stats = self._usage_stats[key]
         stats["total_calls"] += 1
@@ -367,12 +440,16 @@ class ModelRouter:
     def get_usage_stats(self) -> Dict[str, Any]:
         return self._usage_stats.copy()
 
-    def estimate_cost(self, task_type: TaskType, estimated_input_tokens: int,
-                      estimated_output_tokens: int) -> Dict[str, float]:
+    def estimate_cost(
+        self,
+        task_type: TaskType,
+        estimated_input_tokens: int,
+        estimated_output_tokens: int,
+    ) -> Dict[str, Any]:
         model = self.select_model(task_type)
         cost = (
-            estimated_input_tokens * model.cost_per_1k_input / 1000 +
-            estimated_output_tokens * model.cost_per_1k_output / 1000
+            estimated_input_tokens * model.cost_per_1k_input / 1000
+            + estimated_output_tokens * model.cost_per_1k_output / 1000
         )
         return {
             "model": model.model,

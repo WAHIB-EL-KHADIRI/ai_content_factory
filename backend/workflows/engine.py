@@ -37,9 +37,13 @@ class WorkflowStatus(str, Enum):
 
 
 class Workflow:
-    def __init__(self, name: str, steps: List[Dict[str, Any]],
-                 triggers: Optional[Dict[str, Any]] = None,
-                 variables: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self,
+        name: str,
+        steps: List[Dict[str, Any]],
+        triggers: Optional[Dict[str, Any]] = None,
+        variables: Optional[Dict[str, Any]] = None,
+    ):
         self.id = str(uuid.uuid4())
         self.name = name
         self.steps = steps
@@ -59,11 +63,16 @@ class Workflow:
 
 
 class WorkflowStep:
-    def __init__(self, name: str, agent_role: str, task: Dict[str, Any],
-                 conditions: Optional[List[Dict[str, Any]]] = None,
-                 retry_config: Optional[Dict[str, Any]] = None,
-                 requires_approval: bool = False,
-                 timeout_seconds: int = 300):
+    def __init__(
+        self,
+        name: str,
+        agent_role: str,
+        task: Dict[str, Any],
+        conditions: Optional[List[Dict[str, Any]]] = None,
+        retry_config: Optional[Dict[str, Any]] = None,
+        requires_approval: bool = False,
+        timeout_seconds: int = 300,
+    ):
         self.id = str(uuid.uuid4())
         self.name = name
         self.agent_role = agent_role
@@ -73,10 +82,10 @@ class WorkflowStep:
         self.requires_approval = requires_approval
         self.timeout_seconds = timeout_seconds
         self.status = StepStatus.PENDING
-        self.result = None
-        self.error = None
-        self.started_at = None
-        self.completed_at = None
+        self.result: Any = None
+        self.error: Optional[str] = None
+        self.started_at: Optional[datetime] = None
+        self.completed_at: Optional[datetime] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -87,7 +96,9 @@ class WorkflowStep:
             "result": self.result,
             "error": self.error,
             "started_at": self.started_at.isoformat() if self.started_at else None,
-            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "completed_at": self.completed_at.isoformat()
+            if self.completed_at
+            else None,
         }
 
 
@@ -99,9 +110,9 @@ class WorkflowRun:
         self.steps: List[WorkflowStep] = []
         self.context: Dict[str, Any] = {}
         self.started_at = _utcnow()
-        self.completed_at = None
-        self.error = None
-        self.output_data = {}
+        self.completed_at: Optional[datetime] = None
+        self.error: Optional[str] = None
+        self.output_data: Dict[str, Any] = {}
 
     @property
     def duration_seconds(self) -> float:
@@ -117,7 +128,9 @@ class WorkflowRun:
             "status": self.status.value,
             "steps": [s.to_dict() for s in self.steps],
             "started_at": self.started_at.isoformat(),
-            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "completed_at": self.completed_at.isoformat()
+            if self.completed_at
+            else None,
             "duration_seconds": self.duration_seconds,
             "error": self.error,
             "output_data": self.output_data,
@@ -148,8 +161,9 @@ class WorkflowEngine:
     def register_approval_callback(self, step_id: str, callback: Callable):
         self._approval_callbacks[step_id] = callback
 
-    async def execute_workflow(self, workflow_id: str,
-                               initial_context: Optional[Dict[str, Any]] = None) -> WorkflowRun:
+    async def execute_workflow(
+        self, workflow_id: str, initial_context: Optional[Dict[str, Any]] = None
+    ) -> WorkflowRun:
         workflow = self._workflows.get(workflow_id)
         if workflow is None:
             raise ValueError(f"Workflow not found: {workflow_id}")
@@ -212,7 +226,7 @@ class WorkflowEngine:
                     step.started_at = None
                     step.completed_at = None
                     run.steps.pop()
-                    delay = step.retry_config.get("delay", 1.0) * (2 ** retry_count)
+                    delay = step.retry_config.get("delay", 1.0) * (2**retry_count)
                     await asyncio.sleep(delay)
                     run.steps.append(step)
                     continue
@@ -224,9 +238,13 @@ class WorkflowEngine:
 
         run.status = WorkflowStatus.COMPLETED
         run.completed_at = _utcnow()
-        run.output_data = {k: v for k, v in run.context.items() if k.endswith("_result")}
+        run.output_data = {
+            k: v for k, v in run.context.items() if k.endswith("_result")
+        }
 
-        logger.info(f"Workflow completed: {workflow.name} in {run.duration_seconds:.1f}s")
+        logger.info(
+            f"Workflow completed: {workflow.name} in {run.duration_seconds:.1f}s"
+        )
         return run
 
     async def _execute_step(self, step: WorkflowStep, context: Dict[str, Any]) -> Any:
@@ -243,8 +261,9 @@ class WorkflowEngine:
         task_data = self._resolve_variables(step.task, context)
         return await self.agent_router.run_single(role, task_data, context)
 
-    def _check_conditions(self, conditions: List[Dict[str, Any]],
-                          context: Dict[str, Any]) -> bool:
+    def _check_conditions(
+        self, conditions: List[Dict[str, Any]], context: Dict[str, Any]
+    ) -> bool:
         for condition in conditions:
             condition_type = condition.get("type", "exists")
             key = condition.get("key", "")
@@ -260,16 +279,21 @@ class WorkflowEngine:
                 return False
             elif condition_type == "contains":
                 ctx_val = str(context.get(key, ""))
-                if value not in ctx_val:
+                if str(value) not in ctx_val:
                     return False
 
         return True
 
-    def _resolve_variables(self, task: Dict[str, Any],
-                           context: Dict[str, Any]) -> Dict[str, Any]:
+    def _resolve_variables(
+        self, task: Dict[str, Any], context: Dict[str, Any]
+    ) -> Dict[str, Any]:
         resolved = {}
         for key, value in task.items():
-            if isinstance(value, str) and value.startswith("{{") and value.endswith("}}"):
+            if (
+                isinstance(value, str)
+                and value.startswith("{{")
+                and value.endswith("}}")
+            ):
                 var_name = value[2:-2].strip()
                 resolved[key] = context.get(var_name, value)
             elif isinstance(value, dict):

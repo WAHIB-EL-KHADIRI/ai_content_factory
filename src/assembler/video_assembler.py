@@ -3,7 +3,7 @@ Video Assembler using MoviePy
 """
 
 import logging
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from pathlib import Path
 
 from moviepy.editor import (
@@ -41,7 +41,7 @@ class VideoAssembler:
         self,
         scenes: List[Dict[str, Any]],
         output_filename: str,
-        title: str = None
+        title: Optional[str] = None
     ) -> str:
         """
         Assemble video from scenes

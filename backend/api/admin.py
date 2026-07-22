@@ -4,7 +4,7 @@ import logging
 import os
 import platform
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -12,11 +12,18 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from backend.db.models import (
-    User, Project, Content, AuditLog, UsageRecord, get_db,
+    User,
+    Project,
+    Content,
+    AuditLog,
+    UsageRecord,
+    get_db,
 )
 from backend.core.pagination import (
-    PaginationParams, SearchFilter,
-    paginate_query, search_query,
+    PaginationParams,
+    SearchFilter,
+    paginate_query,
+    search_query,
 )
 from backend.api.routes import require_auth
 
@@ -47,10 +54,15 @@ async def get_system_stats(
     db: Session = Depends(get_db),
 ):
     total_users = db.query(func.count(User.id)).scalar() or 0
-    active_users = db.query(func.count(User.id)).filter(User.is_active).scalar() or 0
+    active_users = (
+        db.query(func.count(User.id)).filter(User.is_active.is_(True)).scalar() or 0
+    )
     total_projects = db.query(func.count(Project.id)).scalar() or 0
     total_content = db.query(func.count(Content.id)).scalar() or 0
-    published_content = db.query(func.count(Content.id)).filter(Content.status == "published").scalar() or 0
+    published_content = (
+        db.query(func.count(Content.id)).filter(Content.status == "published").scalar()
+        or 0
+    )
     total_api_calls = db.query(func.count(UsageRecord.id)).scalar() or 0
     total_tokens = db.query(func.sum(UsageRecord.total_tokens)).scalar() or 0
     total_cost = db.query(func.sum(UsageRecord.cost_usd)).scalar() or 0.0
@@ -156,7 +168,9 @@ async def deactivate_user(
     db: Session = Depends(get_db),
 ):
     if user_id == admin.id:
-        raise HTTPException(status_code=400, detail="Cannot deactivate your own account")
+        raise HTTPException(
+            status_code=400, detail="Cannot deactivate your own account"
+        )
 
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -239,9 +253,10 @@ async def system_health(
     except Exception as exc:
         db_status = f"unhealthy: {exc}"
 
-    disk_usage = {}
+    disk_usage: Dict[str, Any] = {}
     try:
         import shutil
+
         total, used, free = shutil.disk_usage(os.getcwd())
         disk_usage = {
             "workspace": {
@@ -254,9 +269,10 @@ async def system_health(
     except (OSError, AttributeError):
         disk_usage = {"error": "Unable to retrieve disk usage"}
 
-    memory_info = {}
+    memory_info: Dict[str, Any] = {}
     try:
         import psutil
+
         mem = psutil.virtual_memory()
         memory_info = {
             "total_bytes": mem.total,

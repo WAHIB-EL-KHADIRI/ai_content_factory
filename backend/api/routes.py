@@ -11,8 +11,11 @@ from sqlalchemy.orm import Session
 from backend.db.models import get_db
 from backend.core.config import get_config
 from backend.core.auth import (
-    create_access_token, decode_access_token, authenticate_user,
-    create_user, generate_api_key
+    create_access_token,
+    decode_access_token,
+    authenticate_user,
+    create_user,
+    generate_api_key,
 )
 from backend.services.model_router import ModelRouter, TaskType
 from backend.services.content import ContentService
@@ -30,7 +33,9 @@ router = APIRouter()
 # --- Auth Dependencies ---
 
 
-async def require_auth(authorization: Optional[str] = Header(None), db: Session = Depends(get_db)):
+async def require_auth(
+    authorization: Optional[str] = Header(None), db: Session = Depends(get_db)
+):
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Authentication required")
     token = authorization.split(" ", 1)[1]
@@ -41,7 +46,8 @@ async def require_auth(authorization: Optional[str] = Header(None), db: Session 
     if user_id is None:
         raise HTTPException(status_code=401, detail="Invalid token payload")
     from backend.db.models import User
-    user = db.query(User).filter(User.id == user_id, User.is_active).first()
+
+    user = db.query(User).filter(User.id == user_id, User.is_active.is_(True)).first()
     if user is None:
         raise HTTPException(status_code=401, detail="User not found or inactive")
     return user
@@ -166,9 +172,14 @@ class MemoryRecallRequest(BaseModel):
 @router.post("/chat")
 async def chat(request: ChatRequest):
     router_model = ModelRouter()
-    task_type = TaskType(request.task_type) if request.task_type in [t.value for t in TaskType] else TaskType.CHAT
+    task_type = (
+        TaskType(request.task_type)
+        if request.task_type in [t.value for t in TaskType]
+        else TaskType.CHAT
+    )
 
     if request.stream:
+
         async def event_generator():
             async for event in router_model.chat_stream(
                 task_type=task_type,
@@ -200,6 +211,7 @@ async def chat(request: ChatRequest):
 @router.get("/models")
 async def list_models():
     from backend.services.model_router import MODELS, TASK_MODEL_PREFERENCES
+
     return {
         "models": {
             k: {
@@ -215,18 +227,21 @@ async def list_models():
             }
             for k, v in MODELS.items()
         },
-        "task_preferences": {
-            k.value: v for k, v in TASK_MODEL_PREFERENCES.items()
-        },
+        "task_preferences": {k.value: v for k, v in TASK_MODEL_PREFERENCES.items()},
     }
 
 
 @router.get("/models/estimate-cost")
-async def estimate_cost(task_type: str, input_tokens: int = 1000, output_tokens: int = 500):
+async def estimate_cost(
+    task_type: str, input_tokens: int = 1000, output_tokens: int = 500
+):
     router_model = ModelRouter()
     return router_model.estimate_cost(
-        TaskType(task_type) if task_type in [t.value for t in TaskType] else TaskType.CHAT,
-        input_tokens, output_tokens
+        TaskType(task_type)
+        if task_type in [t.value for t in TaskType]
+        else TaskType.CHAT,
+        input_tokens,
+        output_tokens,
     )
 
 
@@ -244,7 +259,9 @@ async def register(request: RegisterRequest, db: Session = Depends(get_db)):
     user = create_user(db, request.email, request.name, request.password)
     if not user:
         raise HTTPException(status_code=409, detail="Email already registered")
-    token = create_access_token({"sub": str(user.id), "email": user.email, "role": user.role})
+    token = create_access_token(
+        {"sub": str(user.id), "email": user.email, "role": user.role}
+    )
     return {
         "access_token": token,
         "token_type": "bearer",
@@ -262,7 +279,9 @@ async def login(request: LoginRequest, db: Session = Depends(get_db)):
     user = authenticate_user(db, request.email, request.password)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid email or password")
-    token = create_access_token({"sub": str(user.id), "email": user.email, "role": user.role})
+    token = create_access_token(
+        {"sub": str(user.id), "email": user.email, "role": user.role}
+    )
     return {
         "access_token": token,
         "token_type": "bearer",
@@ -288,10 +307,13 @@ async def get_me(user=Depends(require_auth)):
 
 
 @router.post("/auth/change-password")
-async def change_password(request: ChangePasswordRequest,
-                          user=Depends(require_auth),
-                          db: Session = Depends(get_db)):
+async def change_password(
+    request: ChangePasswordRequest,
+    user=Depends(require_auth),
+    db: Session = Depends(get_db),
+):
     from backend.core.auth import verify_password, hash_password
+
     if not verify_password(request.current_password, user.hashed_password):
         raise HTTPException(status_code=400, detail="Current password is incorrect")
     user.hashed_password = hash_password(request.new_password)
@@ -303,10 +325,13 @@ async def change_password(request: ChangePasswordRequest,
 
 
 @router.post("/api-keys")
-async def create_api_key(request: APIKeyCreateRequest,
-                         user=Depends(require_auth),
-                         db: Session = Depends(get_db)):
+async def create_api_key(
+    request: APIKeyCreateRequest,
+    user=Depends(require_auth),
+    db: Session = Depends(get_db),
+):
     from backend.db.models import APIKey
+
     raw_key, key_with_prefix, key_hash = generate_api_key()
     api_key = APIKey(
         name=request.name,
@@ -330,6 +355,7 @@ async def create_api_key(request: APIKeyCreateRequest,
 @router.get("/api-keys")
 async def list_api_keys(user=Depends(require_auth), db: Session = Depends(get_db)):
     from backend.db.models import APIKey
+
     keys = db.query(APIKey).filter(APIKey.user_id == user.id).all()
     return {
         "api_keys": [
@@ -347,10 +373,14 @@ async def list_api_keys(user=Depends(require_auth), db: Session = Depends(get_db
 
 
 @router.delete("/api-keys/{key_id}")
-async def revoke_api_key(key_id: str, user=Depends(require_auth),
-                         db: Session = Depends(get_db)):
+async def revoke_api_key(
+    key_id: str, user=Depends(require_auth), db: Session = Depends(get_db)
+):
     from backend.db.models import APIKey
-    key = db.query(APIKey).filter(APIKey.id == key_id, APIKey.user_id == user.id).first()
+
+    key = (
+        db.query(APIKey).filter(APIKey.id == key_id, APIKey.user_id == user.id).first()
+    )
     if not key:
         raise HTTPException(status_code=404, detail="API key not found")
     key.is_active = False
@@ -373,7 +403,9 @@ async def run_agent(request: AgentTaskRequest):
     try:
         role = AgentRole(request.agent_role)
     except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid agent role: {request.agent_role}")
+        raise HTTPException(
+            status_code=400, detail=f"Invalid agent role: {request.agent_role}"
+        )
 
     result = await agent_router.run_single(role, request.task, request.context)
     return result.to_dict()
@@ -449,7 +481,7 @@ async def optimize_seo(request: SEORequest):
         return result
     elif request.content:
         seo_agent = AgentRouter()
-        result = await seo_agent.run_single(
+        agent_result = await seo_agent.run_single(
             role=AgentRole.SEO,
             task={
                 "action": request.action,
@@ -457,9 +489,11 @@ async def optimize_seo(request: SEORequest):
                 "keywords": request.keywords,
             },
         )
-        return result.to_dict()
+        return agent_result.to_dict()
     else:
-        raise HTTPException(status_code=400, detail="Either content_id or content is required")
+        raise HTTPException(
+            status_code=400, detail="Either content_id or content is required"
+        )
 
 
 @router.post("/content/translate")
@@ -482,8 +516,9 @@ async def get_content(content_id: str):
 
 
 @router.get("/content")
-async def list_content(project_id: str, content_type: Optional[str] = None,
-                       status: Optional[str] = None):
+async def list_content(
+    project_id: str, content_type: Optional[str] = None, status: Optional[str] = None
+):
     content_service = ContentService()
     return content_service.list_content(project_id, content_type, status)
 
@@ -581,7 +616,9 @@ async def create_video_workflow(topic: str):
 
 
 @router.post("/workflows/templates/social")
-async def create_social_workflow(topic: str, platforms: List[str] = ["twitter", "linkedin"]):
+async def create_social_workflow(
+    topic: str, platforms: List[str] = ["twitter", "linkedin"]
+):
     engine = get_workflow_engine()
     workflow = WorkflowBuilder.create_social_media_batch(topic, platforms)
     workflow_id = engine.register_workflow(workflow)
@@ -683,18 +720,21 @@ class VideoScriptRequest(BaseModel):
 @router.get("/video/info")
 async def video_pipeline_info():
     from backend.services.video import VideoService
+
     return VideoService().get_pipeline_info()
 
 
 @router.get("/video/validate")
 async def video_validate_config():
     from backend.services.video import VideoService
+
     return await VideoService().validate_config()
 
 
 @router.post("/video/generate")
 async def generate_video(request: VideoGenerateRequest):
     from backend.services.video import VideoService
+
     result = await VideoService().generate_video(
         topic=request.topic,
         output_filename=request.output_filename,
@@ -706,6 +746,7 @@ async def generate_video(request: VideoGenerateRequest):
 @router.post("/video/script")
 async def generate_video_script(request: VideoScriptRequest):
     from backend.services.video import VideoService
+
     result = await VideoService().generate_script_only(
         topic=request.topic,
         mock=request.mock,
@@ -730,6 +771,7 @@ class DeepResearchRequest(BaseModel):
 @router.post("/rag/research")
 async def research_topic(request: ResearchRequest):
     from backend.services.rag import RAGStudio
+
     rag = RAGStudio()
     result = await rag.research(
         query=request.query,
@@ -740,7 +782,13 @@ async def research_topic(request: ResearchRequest):
         "query": result.query,
         "summary": result.summary,
         "sources": [
-            {"id": s.id, "title": s.title, "url": s.url, "snippet": s.snippet, "relevance": s.relevance}
+            {
+                "id": s.id,
+                "title": s.title,
+                "url": s.url,
+                "snippet": s.snippet,
+                "relevance": s.relevance,
+            }
             for s in result.sources
         ],
         "model_used": result.model_used,
@@ -751,6 +799,7 @@ async def research_topic(request: ResearchRequest):
 @router.post("/rag/deep-research")
 async def deep_research_topic(request: DeepResearchRequest):
     from backend.services.rag import RAGStudio
+
     rag = RAGStudio()
     return await rag.deep_research(
         query=request.query,

@@ -4,7 +4,7 @@ Visual Generator with support for multiple image generation providers
 
 import os
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from pathlib import Path
 import requests
 
@@ -33,7 +33,7 @@ class VisualGenerator:
         
         logger.info(f"VisualGenerator initialized with provider: {self.provider}")
     
-    def generate_image(self, prompt: str, output_path: str = None, mock: bool = False) -> str:
+    def generate_image(self, prompt: str, output_path: Optional[str] = None, mock: bool = False) -> str:
         """
         Generate image from text prompt
         
