@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { api, Agent } from '../api/client'
 import LoadingSpinner from '../components/LoadingSpinner'
+import { getErrorMessage } from '../lib/errors'
 import { Bot, Play, ChevronDown, ChevronUp } from 'lucide-react'
 
 export default function Agents() {
@@ -27,8 +28,8 @@ export default function Agents() {
         task: { instruction: taskInput },
       })
       setResults(prev => ({ ...prev, [role]: result.output || 'No output' }))
-    } catch (err: any) {
-      setResults(prev => ({ ...prev, [role]: `Error: ${err.message}` }))
+    } catch (err) {
+      setResults(prev => ({ ...prev, [role]: `Error: ${getErrorMessage(err)}` }))
     }
     setRunning(null)
   }

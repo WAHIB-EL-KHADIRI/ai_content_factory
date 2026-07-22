@@ -245,7 +245,6 @@ export interface Memory {
 export interface DashboardData {
   summary: Record<string, unknown>
   recent_activity: Record<string, unknown>[]
-  top_models: Record<string, unknown>[]
 }
 
 export interface Webhook {

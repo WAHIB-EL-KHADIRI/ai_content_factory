@@ -35,8 +35,6 @@ export default function Analytics() {
 
   if (loading) return <LoadingSpinner text="Loading analytics..." />
 
-  const summary = (dashboard?.summary as Record<string, unknown>) || {}
-
   return (
     <div className="space-y-6">
       <div>

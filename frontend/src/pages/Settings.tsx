@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../hooks/useAuth'
 import { api } from '../api/client'
+import { getErrorMessage } from '../lib/errors'
 import { Key, Shield, User } from 'lucide-react'
 
 export default function Settings() {
@@ -18,8 +19,8 @@ export default function Settings() {
       await api.post('/auth/change-password', passwordForm)
       setMessage('Password changed successfully')
       setPasswordForm({ current_password: '', new_password: '' })
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err) {
+      setError(getErrorMessage(err))
     }
   }
 
@@ -30,8 +31,8 @@ export default function Settings() {
       const result = await api.post<{ key: string; name: string }>('/api-keys', { name: apiKeyName })
       setNewApiKey(result.key)
       setApiKeyName('')
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err) {
+      setError(getErrorMessage(err))
     }
   }
 

@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../hooks/useAuth'
+import { getErrorMessage } from '../lib/errors'
 import { Bot, Eye, EyeOff } from 'lucide-react'
 
 export default function Login() {
@@ -22,11 +23,17 @@ export default function Login() {
       } else {
         await login(email, password)
       }
-    } catch (err: any) {
-      setError(err.message || 'Authentication failed')
+    } catch (err) {
+      setError(getErrorMessage(err) || 'Authentication failed')
     }
     setLoading(false)
   }
+
+  const submitLabel = loading
+    ? 'Please wait...'
+    : isRegister
+      ? 'Create Account'
+      : 'Sign In'
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-950 px-4">
@@ -90,7 +97,7 @@ export default function Login() {
               </button>
             </div>
             <button type="submit" disabled={loading} className="btn-primary w-full py-3">
-              {loading ? 'Please wait...' : isRegister ? 'Create Account' : 'Sign In'}
+              {submitLabel}
             </button>
           </form>
 

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { api, DashboardData } from '../api/client'
 import LoadingSpinner from '../components/LoadingSpinner'
-import { Activity, Cpu, DollarSign, TrendingUp } from 'lucide-react'
+import { Activity, Cpu, DollarSign, TrendingUp, type LucideIcon } from 'lucide-react'
 
-function StatCard({ icon: Icon, label, value, color }: { icon: any; label: string; value: string | number; color: string }) {
+function StatCard({ icon: Icon, label, value, color }: { icon: LucideIcon; label: string; value: string | number; color: string }) {
   return (
     <div className="card flex items-center gap-4">
       <div className={`p-3 rounded-lg ${color}`}>
@@ -54,37 +54,20 @@ export default function Dashboard() {
         <StatCard icon={TrendingUp} label="Brand Consistency" value={`${Number(summary.brand_consistency_avg || 0)}%`} color="bg-purple-600/20 text-purple-400" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="card">
-          <h2 className="text-lg font-semibold mb-4">Recent Activity</h2>
-          {activity.length === 0 ? (
-            <p className="text-gray-500 text-sm">No recent activity</p>
-          ) : (
-            <div className="space-y-3">
-              {activity.slice(0, 5).map((item, i) => (
-                <div key={i} className="flex items-center justify-between py-2 border-b border-gray-800 last:border-0">
-                  <span className="text-sm">{String(item.action || 'Operation')}</span>
-                  <span className="text-xs text-gray-500">{String(item.timestamp || '')}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="card">
-          <h2 className="text-lg font-semibold mb-4">Models Overview</h2>
+      <div className="card">
+        <h2 className="text-lg font-semibold mb-4">Recent Activity</h2>
+        {activity.length === 0 ? (
+          <p className="text-gray-500 text-sm">No recent activity</p>
+        ) : (
           <div className="space-y-3">
-            {[].map(m => (
-              <div key={m.name} className="flex items-center justify-between py-2 border-b border-gray-800 last:border-0">
-                <div>
-                  <span className="text-sm font-medium">{m.name}</span>
-                  <span className="ml-2 text-xs badge-blue">{m.tier}</span>
-                </div>
-                <span className="text-xs text-gray-400">Quality: {m.quality}</span>
+            {activity.slice(0, 5).map((item, i) => (
+              <div key={i} className="flex items-center justify-between py-2 border-b border-gray-800 last:border-0">
+                <span className="text-sm">{String(item.action || 'Operation')}</span>
+                <span className="text-xs text-gray-500">{String(item.timestamp || '')}</span>
               </div>
             ))}
           </div>
-        </div>
+        )}
       </div>
 
       <div className="card">

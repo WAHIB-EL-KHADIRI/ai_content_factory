@@ -10,6 +10,12 @@ interface Plugin {
   type: string
 }
 
+interface PluginInfo {
+  version?: string
+  description?: string
+  type?: string
+}
+
 export default function Plugins() {
   const [plugins, setPlugins] = useState<Plugin[]>([])
   const [loading, setLoading] = useState(true)
@@ -17,12 +23,15 @@ export default function Plugins() {
   useEffect(() => {
     api.get<{ plugins: Record<string, unknown> }>('/plugins')
       .then(data => {
-        const list = Object.entries(data.plugins || {}).map(([name, info]: [string, any]) => ({
-          name,
-          version: info.version || '1.0.0',
-          description: info.description || 'No description',
-          type: info.type || 'unknown',
-        }))
+        const list = Object.entries(data.plugins || {}).map(([name, raw]) => {
+          const info = raw as PluginInfo
+          return {
+            name,
+            version: info.version || '1.0.0',
+            description: info.description || 'No description',
+            type: info.type || 'unknown',
+          }
+        })
         setPlugins(list)
       })
       .catch(() => setPlugins([]))

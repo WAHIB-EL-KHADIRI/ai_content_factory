@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { api, Project } from '../api/client'
-import { useToast } from '../components/Toast'
+import { useToast } from '../hooks/useToast'
 import DataTable, { Column } from '../components/DataTable'
 import Pagination from '../components/Pagination'
 import SearchBar from '../components/SearchBar'

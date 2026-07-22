@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
-import { useTheme } from '../contexts/ThemeContext'
+import { useAuth } from '../hooks/useAuth'
+import { useTheme } from '../hooks/useTheme'
 import {
   LayoutDashboard, MessageSquare, FileText, Bot, GitBranch,
   Palette, Database, BarChart3, Puzzle, Settings, LogOut,

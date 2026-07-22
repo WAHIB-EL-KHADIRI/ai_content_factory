@@ -1,15 +1,5 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
-
-type Theme = 'light' | 'dark' | 'system'
-
-interface ThemeContextType {
-  theme: Theme
-  effectiveTheme: 'light' | 'dark'
-  setTheme: (theme: Theme) => void
-  toggleTheme: () => void
-}
-
-const ThemeContext = createContext<ThemeContextType | null>(null)
+import { useState, useEffect, useCallback, ReactNode } from 'react'
+import { Theme, ThemeContext } from './theme-context'
 
 function getSystemTheme(): 'light' | 'dark' {
   if (typeof window === 'undefined') return 'dark'
@@ -74,10 +64,4 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       {children}
     </ThemeContext.Provider>
   )
-}
-
-export function useTheme() {
-  const ctx = useContext(ThemeContext)
-  if (!ctx) throw new Error('useTheme must be used within ThemeProvider')
-  return ctx
 }

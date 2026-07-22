@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { api } from '../api/client'
+import { getErrorMessage } from '../lib/errors'
 import { Send, Loader2, Trash2 } from 'lucide-react'
 
 interface Message {
@@ -7,6 +8,10 @@ interface Message {
   content: string
   model?: string
   tokens?: number
+}
+
+interface ChatUsage {
+  output_tokens?: number
 }
 
 export default function Chat() {
@@ -60,18 +65,18 @@ export default function Chat() {
               role: 'assistant',
               content: chunk.content as string,
               model: chunk.model as string,
-              tokens: (chunk.usage as any)?.output_tokens,
+              tokens: (chunk.usage as ChatUsage | undefined)?.output_tokens,
             }
             return updated
           })
         }
       })
-    } catch (err: any) {
+    } catch (err) {
       setMessages(prev => {
         const updated = [...prev]
         updated[updated.length - 1] = {
           role: 'assistant',
-          content: `Error: ${err.message}`,
+          content: `Error: ${getErrorMessage(err)}`,
         }
         return updated
       })

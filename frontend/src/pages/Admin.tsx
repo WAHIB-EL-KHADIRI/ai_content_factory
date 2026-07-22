@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api, User, AdminStats } from '../api/client'
-import { useAuth } from '../contexts/AuthContext'
-import { useToast } from '../components/Toast'
+import { useAuth } from '../hooks/useAuth'
+import { useToast } from '../hooks/useToast'
 import DataTable, { Column } from '../components/DataTable'
 import { Spinner } from '../components/LoadingStates'
 import {

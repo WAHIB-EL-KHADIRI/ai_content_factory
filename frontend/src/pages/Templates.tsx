@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useToast } from '../components/Toast'
+import { useToast } from '../hooks/useToast'
 import { api } from '../api/client'
 import {
   FileText, Share2, Mail, Video, Megaphone, BookOpen,
@@ -119,9 +119,10 @@ export default function Templates() {
         {templates.map(template => {
           const Icon = template.icon
           return (
-            <div
+            <button
               key={template.id}
-              className="card group cursor-pointer hover:border-gray-700 transition-all duration-200"
+              type="button"
+              className="card group cursor-pointer hover:border-gray-700 transition-all duration-200 w-full text-left"
               onClick={() => setSelectedTemplate(template)}
             >
               <div className={`inline-flex p-3 rounded-xl border ${template.color} mb-4`}>
@@ -132,7 +133,7 @@ export default function Templates() {
               <div className="flex items-center gap-1 text-sm font-medium text-brand-400 group-hover:text-brand-300 transition-colors">
                 Use template <ArrowRight size={14} />
               </div>
-            </div>
+            </button>
           )
         })}
       </div>
