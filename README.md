@@ -40,34 +40,32 @@
 
 ## Architecture
 
-```
-┌──────────────────────────────────────────────────────────────────────┐
-│                         FRONTEND                                     │
-│               React 18 · TypeScript · Tailwind · Vite                │
-│          Dashboard · Workflow Builder · Chat · Content Editor         │
-├──────────────────────────────────────────────────────────────────────┤
-│                          API LAYER                                    │
-│    FastAPI · REST + WebSocket · JWT Auth · Rate Limiting · CORS      │
-│    /api/v1/auth  /chat  /agents  /content  /workflows  /brands      │
-├──────────────┬───────────────┬───────────────┬───────────────────────┤
-│   SERVICES   │    AGENTS     │   WORKFLOWS   │      PLUGINS          │
-│  Content Svc │  Research     │  Engine       │  AgentPlugin          │
-│  Brand Svc   │  Writer       │  Builder      │  ToolPlugin           │
-│  Memory Svc  │  SEO          │  Conditions   │  IntegrationPlugin    │
-│  Model Router│  Editor       │  Retries      │  Plugin Registry      │
-│  Analytics   │  Translator   │  Approval     │                       │
-│              │  Designer     │  Gates        │                       │
-│              │  Publisher    │               │                       │
-│              │  Reviewer     │               │                       │
-├──────────────┴───────────────┴───────────────┴───────────────────────┤
-│                       MODEL LAYER                                    │
-│            OpenAI (GPT-4o)  ·  Anthropic (Claude)  ·  DeepSeek      │
-│              Cost optimization  ·  Quality routing  ·  Fallbacks     │
-├──────────────────────────────────────────────────────────────────────┤
-│                     DATA & INFRASTRUCTURE                             │
-│        SQLite/PostgreSQL · SQLAlchemy ORM · Redis · Celery           │
-│              Alembic Migrations · Docker · GitHub Actions            │
-└──────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    FE["Frontend<br/>React 18 / TypeScript / Tailwind / Vite<br/>Dashboard - Workflow Builder - Chat - Editor"]
+    FE -->|"REST + WebSocket"| API
+
+    API["API Layer - FastAPI<br/>JWT Auth / Rate Limiting / CORS<br/>/auth /chat /agents /content /workflows /brands"]
+
+    subgraph Core["Core"]
+        SVC["Services<br/>Content / Brand / Memory<br/>Model Router / Analytics"]
+        AGENTS["8 Agents<br/>Research - Writer - SEO - Editor<br/>Translator - Designer - Publisher - Reviewer"]
+        WF["Workflow Engine<br/>Conditions / Retries / Approval Gates"]
+        PLUG["Plugins<br/>Agent / Tool / Integration"]
+    end
+    API --> SVC
+    API --> AGENTS
+    API --> WF
+    API --> PLUG
+    WF --> AGENTS
+    SVC --> AGENTS
+
+    MODEL["Model Layer<br/>OpenAI GPT-4o - Anthropic Claude - DeepSeek<br/>cost optimization / quality routing / fallback"]
+    AGENTS --> MODEL
+
+    DATA["Data and Infrastructure<br/>SQLite-PostgreSQL / SQLAlchemy / Redis / Celery<br/>Alembic - Docker - GitHub Actions"]
+    SVC --> DATA
+    WF --> DATA
 ```
 
 ---
