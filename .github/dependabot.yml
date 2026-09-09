@@ -1,0 +1,18 @@
+version: 2
+
+# ci.yml pins every action to a commit SHA, which stops a moved tag from
+# silently changing what runs in a job that holds Docker Hub credentials. A SHA
+# does not float, so something has to move it on purpose -- that is this file.
+# Without it, pinning would trade a supply-chain risk for a staleness one.
+#
+# Only github-actions is enabled. npm and pip security fixes already arrive
+# through Dependabot security updates; adding version updates for them here
+# would reopen the advisories tracked as blocked in issue #1 every week.
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
