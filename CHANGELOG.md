@@ -6,6 +6,41 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.1.0] — 2026-09-14
+
+Correctness and supply-chain work on top of 1.0.0. No new product surface.
+
+### Fixed
+
+- **CI had been running zero jobs on every push since it was set up** — an
+  invalid workflow trigger meant the pipeline reported nothing rather than
+  failing. Every check in this list only started running once that was fixed.
+- Two real bugs surfaced while resolving mypy errors, not merely type
+  annotations.
+- A broken CDATA wrapper in the docs, and a coverage badge that displayed a
+  number nothing produced.
+- ESLint was missing from the frontend entirely; added, with the lint and type
+  errors it then reported all fixed.
+
+### Security
+
+- Five dependencies with known CVEs bumped.
+- Least-privilege `permissions:` declared on every workflow, and every action
+  pinned to a commit SHA.
+- `js-yaml` raised to 4.3.1.
+- `pip-audit` runs as a warning rather than a gate while #1 is open, so it
+  reports without blocking unrelated work.
+
+### Changed
+
+- ORM models migrated to the SQLAlchemy 2.0 typed style.
+- Backend formatted with `ruff format`.
+- Leftover references to AI coding tools removed from the source.
+
+### Added
+
+- Mermaid architecture diagram in the documentation (#2).
+
 ## [1.0.0] — 2026-07-21
 
 Initial public release.
