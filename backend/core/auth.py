@@ -36,7 +36,7 @@ def verify_password(password: str, hashed: str) -> bool:
 def create_access_token(
     data: Dict[str, Any], expires_delta: Optional[timedelta] = None
 ) -> str:
-    from jose import jwt
+    import jwt
 
     config = get_config()
     to_encode = data.copy()
@@ -55,7 +55,7 @@ def create_access_token(
 
 
 def decode_access_token(token: str) -> Optional[Dict[str, Any]]:
-    from jose import jwt, JWTError
+    import jwt
 
     config = get_config()
     try:
@@ -65,7 +65,7 @@ def decode_access_token(token: str) -> Optional[Dict[str, Any]]:
             algorithms=[config.security.algorithm],
         )
         return payload
-    except JWTError:
+    except jwt.PyJWTError:
         return None
 
 

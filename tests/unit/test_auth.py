@@ -1,10 +1,14 @@
 """Tests for authentication system"""
 
+from datetime import datetime, timedelta, timezone
+
+import jwt
 import pytest
 from fastapi.testclient import TestClient
 from backend.api.app import create_app
 from backend.db.models import User
 from backend.core.auth import hash_password, verify_password, create_access_token, decode_access_token
+from backend.core.config import get_config
 
 
 @pytest.fixture
@@ -72,6 +76,47 @@ class TestJWTTokens:
     def test_decode_invalid_token(self):
         payload = decode_access_token("invalid.token.here")
         assert payload is None
+
+    def test_expired_token_is_rejected(self):
+        """A token past its exp must not decode.
+
+        decode_access_token returns None for every rejection, so an accepted
+        expired token would look exactly like a valid one to every caller --
+        which is an authentication bypass, not a test-only detail. The
+        existing cases cover a valid token and a malformed one; neither would
+        catch expiry verification being silently dropped.
+        """
+        token = create_access_token({"sub": "user123"}, expires_delta=timedelta(seconds=-60))
+        assert decode_access_token(token) is None
+
+    def test_token_signed_with_another_key_is_rejected(self):
+        """The signature has to be checked against our key, not just parsed."""
+        config = get_config()
+        forged = jwt.encode(
+            {"sub": "user123", "exp": datetime.now(timezone.utc) + timedelta(minutes=5)},
+            "an-attacker-controlled-key",
+            algorithm=config.security.algorithm,
+        )
+        assert decode_access_token(forged) is None
+
+    def test_unsigned_token_is_rejected(self):
+        """alg=none must not be honoured.
+
+        decode() is called with an explicit algorithms= list, which is what
+        makes this safe; the test exists so that removing the list fails here.
+        """
+        config = get_config()
+        unsigned = jwt.encode(
+            {"sub": "user123", "exp": datetime.now(timezone.utc) + timedelta(minutes=5)},
+            key="",
+            algorithm="none",
+        )
+        assert decode_access_token(unsigned) is None
+
+    def test_a_tampered_signature_is_rejected(self):
+        token = create_access_token({"sub": "user123"})
+        tampered = token[:-3] + ("aaa" if not token.endswith("aaa") else "bbb")
+        assert decode_access_token(tampered) is None
 
 
 class TestRegisterEndpoint:
