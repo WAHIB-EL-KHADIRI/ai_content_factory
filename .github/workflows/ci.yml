@@ -122,9 +122,15 @@ jobs:
       - name: Install pip-audit
         run: pip install pip-audit
 
+      # A hard gate again. It was downgraded to a warning while issue #1
+      # was open: fastapi==0.115.0 pinned starlette<0.39.0 while every
+      # starlette fix was >=0.39.0, and python-jose hard-pinned
+      # pyasn1<0.5.0 -- neither was fixable by a version bump, so failing
+      # here would have blocked every PR on something no PR could fix.
+      # Both are resolved, `pip-audit -r requirements.txt` is clean, and a
+      # warning nobody has to act on is how the next CVE gets ignored.
       - name: Python audit
-        run: |
-          pip-audit -r requirements.txt || echo "::warning::pip-audit found known vulnerabilities — see job output. Known blocked items are tracked in issue #1: starlette needs a fastapi upgrade first (fastapi==0.115.0 pins starlette<0.39.0, but every starlette fix version is >=0.39.0), and pyasn1/ecdsa are hard-pinned by python-jose. Do not silently ignore *new* findings here."
+        run: pip-audit -r requirements.txt
 
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0

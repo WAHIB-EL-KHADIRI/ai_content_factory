@@ -1,7 +1,7 @@
 # AI Content OS - Runtime Dependencies
 
 # Core Framework
-fastapi==0.115.0
+fastapi==0.141.1
 uvicorn[standard]==0.30.6
 pydantic==2.9.2
 python-multipart==0.0.31
@@ -36,5 +36,5 @@ pydub==0.25.1
 
 # Utilities
 tqdm==4.66.5
-python-jose[cryptography]==3.4.0
+PyJWT==2.14.0
 passlib[bcrypt]==1.7.4
