@@ -165,20 +165,42 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      - name: Extract tag
+        id: tag
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+
+      # Publishing the image is optional: the registry credentials are not
+      # required to cut a release, and a fork will never have them. Probe for
+      # them once and gate the Docker steps on the result, so a missing
+      # credential skips the publish instead of failing the tag build and
+      # taking the GitHub Release down with it. Only the true/false verdict is
+      # written to the output -- never the secret values.
+      - name: Check for Docker Hub credentials
+        id: dockerhub
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          if [ -n "$DOCKERHUB_USERNAME" ] && [ -n "$DOCKERHUB_TOKEN" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Docker Hub publish skipped::DOCKERHUB_USERNAME / DOCKERHUB_TOKEN are not set, so the image was not pushed. The GitHub Release is still created."
+          fi
+
       - name: Set up Docker Buildx
+        if: steps.dockerhub.outputs.configured == 'true'
         uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
 
       - name: Login to Docker Hub
+        if: steps.dockerhub.outputs.configured == 'true'
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Extract tag
-        id: tag
-        run: echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
-
       - name: Build and push
+        if: steps.dockerhub.outputs.configured == 'true'
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
