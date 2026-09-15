@@ -105,7 +105,6 @@ class TestJWTTokens:
         decode() is called with an explicit algorithms= list, which is what
         makes this safe; the test exists so that removing the list fails here.
         """
-        config = get_config()
         unsigned = jwt.encode(
             {"sub": "user123", "exp": datetime.now(timezone.utc) + timedelta(minutes=5)},
             key="",
