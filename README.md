@@ -301,8 +301,8 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 <div align="center">
 
-**Built with care by the AI Content OS community**
-
-[Report Bug](https://github.com/WAHIB-EL-KHADIRI/ai_content_factory/issues) · [Request Feature](https://github.com/WAHIB-EL-KHADIRI/ai_content_factory/issues) · [Discussions](https://github.com/WAHIB-EL-KHADIRI/ai_content_factory/discussions)
+Built and maintained by [WAHIB EL KHADIRI](https://github.com/WAHIB-EL-KHADIRI).
+Bugs, feature requests and questions all go to
+[Issues](https://github.com/WAHIB-EL-KHADIRI/ai_content_factory/issues).
 
 </div>
