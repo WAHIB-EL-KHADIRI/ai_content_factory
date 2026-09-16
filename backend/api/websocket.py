@@ -9,6 +9,7 @@ from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
 from starlette.websockets import WebSocketState
 
 from backend.core.auth import decode_access_token
+from backend.core.logsafe import scrub
 
 logger = logging.getLogger("ai_content_os.websocket")
 
@@ -30,7 +31,7 @@ class ConnectionManager:
             self._channels[channel] = set()
         self._channels[channel].add(websocket)
         self._connections.setdefault(websocket, set()).add(channel)
-        logger.info("WebSocket connected to channel '%s'", channel)
+        logger.info("WebSocket connected to channel '%s'", scrub(channel))
 
     async def disconnect(self, websocket: WebSocket, channel: str) -> None:
         if channel in self._channels:
@@ -41,7 +42,7 @@ class ConnectionManager:
             self._connections[websocket].discard(channel)
             if not self._connections[websocket]:
                 del self._connections[websocket]
-        logger.info("WebSocket disconnected from channel '%s'", channel)
+        logger.info("WebSocket disconnected from channel '%s'", scrub(channel))
 
     async def broadcast(self, channel: str, message: dict) -> int:
         if channel not in self._channels:
@@ -184,5 +185,5 @@ async def websocket_endpoint(
     except WebSocketDisconnect:
         await manager.disconnect(websocket, channel)
     except Exception:
-        logger.exception("WebSocket error on channel '%s'", channel)
+        logger.exception("WebSocket error on channel '%s'", scrub(channel))
         await manager.disconnect(websocket, channel)
