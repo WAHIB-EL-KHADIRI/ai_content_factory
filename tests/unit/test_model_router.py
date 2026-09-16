@@ -1,5 +1,8 @@
 """Unit tests for model router"""
 
+import asyncio
+import json
+
 from backend.services.model_router import (
     ModelRouter, TaskType, MODELS, TASK_MODEL_PREFERENCES
 )
@@ -55,3 +58,60 @@ class TestModelRouter:
             assert model.cost_per_1k_input >= 0
             assert model.cost_per_1k_output >= 0
             assert model.max_tokens > 0
+
+
+# A provider exception carrying exactly the kinds of detail these errors carry
+# in production: an endpoint, a request id, and a credential prefix.
+_PROVIDER_ERROR = (
+    "connection to https://api.internal.example/v1/messages failed "
+    "(request_id=req_9f3ab2, key=sk-live-ABCDEF0123456789)"
+)
+
+
+class _ExplodingClient:
+    """Any call on this object raises, whichever provider branch is taken."""
+
+    def __getattr__(self, name):
+        return self
+
+    def __call__(self, *args, **kwargs):
+        raise RuntimeError(_PROVIDER_ERROR)
+
+
+class TestStreamErrorDisclosure:
+    """`/chat` is unauthenticated and streams these events straight to the
+    browser, so the error payload must not carry the provider's exception."""
+
+    @staticmethod
+    def _events():
+        router = ModelRouter()
+        router.get_async_client = lambda model: _ExplodingClient()
+
+        async def drive():
+            return [
+                event
+                async for event in router.chat_stream(
+                    TaskType.CHAT, [{"role": "user", "content": "hi"}]
+                )
+            ]
+
+        return asyncio.run(drive())
+
+    def test_the_failure_is_reported_at_all(self):
+        errors = [e for e in self._events() if e.get("type") == "error"]
+        assert len(errors) == 1
+
+    def test_no_provider_detail_reaches_the_client(self):
+        payload = json.dumps(self._events())
+
+        assert _PROVIDER_ERROR not in payload
+        # Each fragment on its own, so a partially-redacted message still fails.
+        assert "api.internal.example" not in payload
+        assert "req_9f3ab2" not in payload
+        assert "sk-live" not in payload
+
+    def test_the_client_gets_a_stable_message_and_an_id_to_quote(self):
+        error = [e for e in self._events() if e.get("type") == "error"][0]
+
+        assert error["error"] == "The model call failed."
+        assert len(error["error_id"]) == 12
