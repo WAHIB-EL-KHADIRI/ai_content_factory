@@ -12,38 +12,41 @@ logical record on one line.
 
 from __future__ import annotations
 
-# Control characters are rendered as an escape rather than dropped, so the
-# value stays readable and, more importantly, stays visibly tampered with.
-_ESCAPES = {
-    "\\": "\\\\",
-    "\n": "\\n",
-    "\r": "\\r",
-    "\t": "\\t",
-}
+import re
+
+# Any remaining C0 control character, plus DEL. The four handled by the
+# explicit replaces below are excluded so this pass cannot double-escape them.
+_REMAINING_CONTROLS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
 MAX_LENGTH = 256
 
 
 def scrub(value: object, max_length: int = MAX_LENGTH) -> str:
-    """Return `value` as a single-line string that is safe to log.
-
-    Backslash is escaped first, so a value that already contained the two
-    characters backslash and 'n' cannot be confused with one that contained a
-    real newline.
-    """
+    """Return `value` as a single-line string that is safe to log."""
     text = value if isinstance(value, str) else str(value)
 
-    out = []
-    for char in text:
-        escape = _ESCAPES.get(char)
-        if escape is not None:
-            out.append(escape)
-        elif ord(char) < 0x20 or ord(char) == 0x7F:
-            out.append("\\x{:02x}".format(ord(char)))
-        else:
-            out.append(char)
+    # Written as an explicit replace chain rather than a character loop
+    # because this is the shape CodeQL's py/log-injection model recognises as
+    # a barrier. A loop that does the same thing is invisible to it, which
+    # leaves five permanently-open alerts and no way to see a sixth.
+    #
+    # Backslash goes first. Otherwise a value that already contained the two
+    # characters backslash and 'n' would come out identical to one that
+    # contained a real newline, and the distinction this function exists to
+    # preserve would be gone.
+    scrubbed = (
+        text.replace("\\", "\\\\")
+        .replace("\r", "\\r")
+        .replace("\n", "\\n")
+        .replace("\t", "\\t")
+    )
 
-    scrubbed = "".join(out)
+    # Escaped rather than stripped, so the value stays readable and, more
+    # importantly, stays visibly tampered with. ANSI escapes go with them: a
+    # log read in a terminal is a rendering surface too.
+    scrubbed = _REMAINING_CONTROLS.sub(
+        lambda match: "\\x{:02x}".format(ord(match.group())), scrubbed
+    )
 
     # An unbounded value is its own problem: a megabyte of text in one record
     # is a denial of service against whoever has to read the file.
