@@ -315,3 +315,76 @@ class TestAdminAuditLog:
         data = response.json()
         assert data["page"] == 1
         assert len(data["items"]) <= 5
+
+
+class TestSystemHealthDisclosure:
+    """`/admin/system/health` reports whether the database is reachable. It
+    used to report *why* it was not, by interpolating the exception into the
+    response -- and a database error routinely carries the DSN."""
+
+    DSN_ERROR = (
+        "could not connect to server: "
+        "postgresql://app_user:s3cr3t-pa55@db.internal.example:5432/prod"
+    )
+
+    @pytest.fixture
+    def broken_db_client(self, client, db_session):
+        """The shared client, with execute() failing for the duration.
+
+        The override goes on the client fixture's own app rather than a second
+        create_app(): the suite runs against one in-memory SQLite database
+        behind a StaticPool, and standing up another app inside a test
+        disturbs it for the rest of the module.
+
+        Only execute() fails. require_admin authenticates with db.query()
+        before the handler runs, so a session that failed at everything would
+        500 in the auth dependency and never reach the code under test.
+        """
+        from backend.db.models import get_db
+
+        dsn_error = self.DSN_ERROR
+
+        class _ExecuteFails:
+            def __init__(self, real):
+                self._real = real
+
+            def __getattr__(self, name):
+                return getattr(self._real, name)
+
+            def execute(self, *args, **kwargs):
+                raise RuntimeError(dsn_error)
+
+        app = client.app
+        previous = app.dependency_overrides.get(get_db)
+        app.dependency_overrides[get_db] = lambda: _ExecuteFails(db_session)
+        try:
+            yield client
+        finally:
+            if previous is None:
+                app.dependency_overrides.pop(get_db, None)
+            else:
+                app.dependency_overrides[get_db] = previous
+
+    def test_the_credentials_do_not_reach_the_response(
+        self, broken_db_client, admin_header
+    ):
+        response = broken_db_client.get(
+            "/api/v1/admin/system/health", headers=admin_header
+        )
+
+        body = response.text
+        assert "s3cr3t-pa55" not in body
+        assert "db.internal.example" not in body
+        assert "postgresql://" not in body
+        assert self.DSN_ERROR not in body
+
+    def test_the_failure_is_still_reported(self, broken_db_client, admin_header):
+        """Redaction must not turn a broken database into a healthy report."""
+        response = broken_db_client.get(
+            "/api/v1/admin/system/health", headers=admin_header
+        )
+
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["database"]["status"] == "unhealthy"
+        assert payload["status"] == "degraded"
