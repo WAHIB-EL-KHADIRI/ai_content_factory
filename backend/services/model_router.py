@@ -2,6 +2,7 @@
 
 import time
 import logging
+import uuid
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 from enum import Enum
@@ -294,7 +295,13 @@ class ModelRouter:
 
         except Exception as e:
             latency_ms = (time.time() - start_time) * 1000
-            logger.error(f"Model call failed: {model.provider}/{model.model}: {e}")
+            logger.error(
+                "Model call failed: %s/%s after %.0fms: %s",
+                model.provider,
+                model.model,
+                latency_ms,
+                e,
+            )
             raise
 
     def get_async_client(self, model: ModelInfo):
@@ -404,8 +411,25 @@ class ModelRouter:
 
         except Exception as e:
             latency_ms = (time.time() - start_time) * 1000
-            logger.error(f"Stream call failed: {model.provider}/{model.model}: {e}")
-            yield {"type": "error", "error": str(e)}
+            # This payload is streamed to the browser over SSE, and /chat is
+            # not authenticated -- so the client gets a stable string and an
+            # id to quote, never the provider's exception. Provider errors
+            # routinely carry the endpoint URL, a request id, the model
+            # deployment name and occasionally a key prefix.
+            error_id = uuid.uuid4().hex[:12]
+            logger.error(
+                "Stream call failed [%s]: %s/%s after %.0fms: %s",
+                error_id,
+                model.provider,
+                model.model,
+                latency_ms,
+                e,
+            )
+            yield {
+                "type": "error",
+                "error": "The model call failed.",
+                "error_id": error_id,
+            }
 
     def _track_usage(
         self,
