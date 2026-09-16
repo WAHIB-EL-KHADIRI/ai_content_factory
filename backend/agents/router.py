@@ -3,6 +3,7 @@
 import logging
 from typing import Dict, Any, Optional, List, Type
 from backend.agents.base import BaseAgent, AgentRole, AgentResult
+from backend.core.logsafe import scrub
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +64,9 @@ class AgentRouter:
     ) -> AgentResult:
         agent = self.get_agent(role)
         logger.info(
-            f"Running {agent.name} for task: {task.get('task_type', 'default')}"
+            "Running %s for task: %s",
+            agent.name,
+            scrub(task.get("task_type", "default")),
         )
         return await agent.execute(task, context)
 
