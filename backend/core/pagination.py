@@ -56,19 +56,17 @@ def paginate_query(
 
     if pagination.sort_by:
         sort_column = getattr(model, pagination.sort_by, None) if model else None
+        # An unknown sort_by leaves the query unordered rather than raising:
+        # it arrives from a query string, and a 500 is the wrong answer to a
+        # typo. There used to be an `else` here that repeated the same
+        # getattr and re-checked the result -- it could only ever see None,
+        # so its body never ran, and `getattr` with a default cannot raise
+        # AttributeError, so its `except` never fired either.
         if sort_column is not None:
             if pagination.sort_order == "desc":
                 query = query.order_by(sort_column.desc())
             else:
                 query = query.order_by(sort_column.asc())
-        else:
-            try:
-                col = getattr(model, pagination.sort_by, None)
-                if col is not None:
-                    order = col.desc() if pagination.sort_order == "desc" else col.asc()
-                    query = query.order_by(order)
-            except AttributeError:
-                pass
 
     items = query.offset(offset).limit(pagination.page_size).all()
 

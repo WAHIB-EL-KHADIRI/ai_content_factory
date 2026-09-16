@@ -250,8 +250,14 @@ async def system_health(
         start = datetime.now(timezone.utc)
         db.execute(func.now())
         db_latency_ms = (datetime.now(timezone.utc) - start).total_seconds() * 1000
-    except Exception as exc:
-        db_status = f"unhealthy: {exc}"
+    except Exception:
+        # The exception text is not put in the response. A database error
+        # routinely carries the DSN, and "is an admin" is not the same as
+        # "should be shown the database credentials" -- health output also
+        # tends to get scraped into monitoring systems that are read more
+        # widely than this endpoint is.
+        db_status = "unhealthy"
+        logger.exception("Database health check failed")
 
     disk_usage: Dict[str, Any] = {}
     try:
