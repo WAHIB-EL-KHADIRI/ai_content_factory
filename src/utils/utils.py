@@ -3,6 +3,7 @@ Utility functions for the AI Video Generation System
 """
 
 import os
+import re
 import logging
 import time
 import yaml
@@ -186,12 +187,9 @@ def cleanup_temp_files(directory: str, pattern: str = "temp_*"):
             logging.warning(f"Failed to remove temp file {file}: {e}")
 
 
-_LOG_ESCAPES = {
-    "\\": "\\\\",
-    "\n": "\\n",
-    "\r": "\\r",
-    "\t": "\\t",
-}
+# Any remaining C0 control character, plus DEL. The four handled by the
+# explicit replaces below are excluded so this pass cannot double-escape them.
+_REMAINING_LOG_CONTROLS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
 
 def scrub_for_log(value, max_length: int = 256) -> str:
@@ -200,8 +198,12 @@ def scrub_for_log(value, max_length: int = 256) -> str:
 
     A value carrying a newline stops being a value and becomes a second
     record, which the reader cannot tell from one the application wrote.
-    Backslash is escaped first so a value that literally contained the two
-    characters backslash and 'n' stays distinguishable from a real newline.
+
+    Written as an explicit replace chain because that is the shape CodeQL's
+    py/log-injection model recognises as a barrier; an equivalent character
+    loop is invisible to it. Backslash is escaped first so a value that
+    literally contained backslash and 'n' stays distinguishable from a real
+    newline.
 
     This duplicates backend/core/logsafe.scrub. It is not imported from
     there on purpose: backend/ imports src/ (see backend/services/video.py),
@@ -216,17 +218,16 @@ def scrub_for_log(value, max_length: int = 256) -> str:
     """
     text = value if isinstance(value, str) else str(value)
 
-    out = []
-    for char in text:
-        escape = _LOG_ESCAPES.get(char)
-        if escape is not None:
-            out.append(escape)
-        elif ord(char) < 0x20 or ord(char) == 0x7F:
-            out.append("\\x{:02x}".format(ord(char)))
-        else:
-            out.append(char)
+    scrubbed = (
+        text.replace("\\", "\\\\")
+        .replace("\r", "\\r")
+        .replace("\n", "\\n")
+        .replace("\t", "\\t")
+    )
 
-    scrubbed = "".join(out)
+    scrubbed = _REMAINING_LOG_CONTROLS.sub(
+        lambda match: "\\x{:02x}".format(ord(match.group())), scrubbed
+    )
 
     if len(scrubbed) > max_length:
         scrubbed = scrubbed[:max_length] + "...[truncated]"
