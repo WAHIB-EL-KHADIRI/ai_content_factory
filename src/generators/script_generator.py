@@ -4,11 +4,11 @@ Script Generator using DeepSeek API
 
 import json
 import logging
-from typing import Dict, List, Any
+from typing import Dict, Any
 from openai import OpenAI
 
 from config.prompts import get_script_prompt
-from src.utils.utils import retry_with_backoff
+from src.utils.utils import retry_with_backoff, scrub_for_log
 
 
 logger = logging.getLogger('VideoGenerator.ScriptGenerator')
@@ -75,7 +75,7 @@ class ScriptGenerator:
                 ]
             }
         
-        logger.info(f"Generating script for topic: {topic}")
+        logger.info("Generating script for topic: %s", scrub_for_log(topic))
         
         prompt = get_script_prompt(topic, self.script_config)
         

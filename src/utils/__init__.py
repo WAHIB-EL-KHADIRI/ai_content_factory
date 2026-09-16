@@ -11,6 +11,7 @@ from .utils import (
     get_cached_file,
     file_exists_and_valid,
     sanitize_filename,
+    scrub_for_log,
     format_duration,
     cleanup_temp_files
 )
@@ -24,6 +25,7 @@ __all__ = [
     'get_cached_file',
     'file_exists_and_valid',
     'sanitize_filename',
+    'scrub_for_log',
     'format_duration',
     'cleanup_temp_files'
 ]

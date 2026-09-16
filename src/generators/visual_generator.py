@@ -2,7 +2,6 @@
 Visual Generator with support for multiple image generation providers
 """
 
-import os
 import logging
 from typing import Dict, Any, Optional
 from pathlib import Path

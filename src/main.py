@@ -7,7 +7,7 @@ This script coordinates all components to generate videos from topics.
 import sys
 import argparse
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Optional
 from tqdm import tqdm
 
 from src.utils import load_config, setup_logging, ensure_directories

@@ -182,3 +182,51 @@ def cleanup_temp_files(directory: str, pattern: str = "temp_*"):
             logging.debug(f"Removed temp file: {file}")
         except Exception as e:
             logging.warning(f"Failed to remove temp file {file}: {e}")
+
+
+_LOG_ESCAPES = {
+    "\\": "\\\\",
+    "\n": "\\n",
+    "\r": "\\r",
+    "\t": "\\t",
+}
+
+
+def scrub_for_log(value, max_length: int = 256) -> str:
+    """
+    Make an untrusted value safe to put in a log line
+
+    A value carrying a newline stops being a value and becomes a second
+    record, which the reader cannot tell from one the application wrote.
+    Backslash is escaped first so a value that literally contained the two
+    characters backslash and 'n' stays distinguishable from a real newline.
+
+    This duplicates backend/core/logsafe.scrub. It is not imported from
+    there on purpose: backend/ imports src/ (see backend/services/video.py),
+    so src/ importing backend/ would close the cycle. Change both together.
+
+    Args:
+        value: Value to place in a log record
+        max_length: Cap on the escaped result
+
+    Returns:
+        A single-line string safe to log
+    """
+    text = value if isinstance(value, str) else str(value)
+
+    out = []
+    for char in text:
+        escape = _LOG_ESCAPES.get(char)
+        if escape is not None:
+            out.append(escape)
+        elif ord(char) < 0x20 or ord(char) == 0x7F:
+            out.append("\\x{:02x}".format(ord(char)))
+        else:
+            out.append(char)
+
+    scrubbed = "".join(out)
+
+    if len(scrubbed) > max_length:
+        scrubbed = scrubbed[:max_length] + "...[truncated]"
+
+    return scrubbed
