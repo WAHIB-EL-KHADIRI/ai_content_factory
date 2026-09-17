@@ -10,7 +10,6 @@
 [![React 18](https://img.shields.io/badge/React-18-61DAFB.svg?style=flat&logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6.svg?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Coverage](https://img.shields.io/badge/coverage-58%25-yellow.svg)](https://github.com/WAHIB-EL-KHADIRI/ai_content_factory/actions/workflows/ci.yml)
 
 ---
 
@@ -269,6 +268,14 @@ All configuration is managed via environment variables. Copy `.env.example` to `
 ---
 
 ## Testing
+
+Last measured in CI on 2026-09-16: **245 passed**, **59% line coverage**
+(1,302 of 3,207 statements uncovered).
+
+That figure is quoted from the CI log and dated, rather than shown as a badge,
+because the Codecov upload is not currently authenticated — a badge would
+either sit stale or read `unknown`. Re-run the command below to check it
+yourself; if the date above is old, trust the command and not the number.
 
 ```bash
 # Unit tests
