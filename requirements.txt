@@ -28,7 +28,7 @@ anthropic==0.37.1
 elevenlabs==1.54.0
 
 # Image Generation
-Pillow==12.3.0
+Pillow==13.0.0
 
 # Video Assembly
 moviepy==1.0.3
